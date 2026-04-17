@@ -27,7 +27,6 @@ export function LocaleSwitcher() {
             : "text-foreground/60 hover:text-foreground"
         }`}
         aria-label="日本語"
-        aria-pressed={locale === "ja"}
       >
         JP
       </button>
@@ -40,7 +39,6 @@ export function LocaleSwitcher() {
             : "text-foreground/60 hover:text-foreground"
         }`}
         aria-label="English"
-        aria-pressed={locale === "en"}
       >
         EN
       </button>
