@@ -213,7 +213,8 @@
     "no_products": "No products found",
     "no_products_sub": "No products match your current filters.",
     "clear_filters": "Clear Filters",
-    "show_count": "Show {count} products"
+    "show_count": "Show {count} products",
+    "close": "Close"
   },
   "badges": {
     "organic": "有機 Organic",

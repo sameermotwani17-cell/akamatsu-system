@@ -213,7 +213,8 @@
     "no_products": "商品が見つかりません",
     "no_products_sub": "フィルターを変更して再度お試しください。",
     "clear_filters": "フィルターをクリア",
-    "show_count": "{count}件を表示"
+    "show_count": "{count}件を表示",
+    "close": "閉じる"
   },
   "badges": {
     "organic": "有機",

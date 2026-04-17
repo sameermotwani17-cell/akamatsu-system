@@ -965,6 +965,8 @@ export default function CheckoutPage() {
     setSubmitError(null);
     setIsProcessing(true);
     try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {

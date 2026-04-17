@@ -11,6 +11,16 @@
 **Live URL (dev):** http://localhost:3000  
 **Build Status:** ✅ 28/28 pages compiled, 0 errors, 0 warnings  
 
+### Implementation Reality (April 2026)
+
+The current production codebase includes several post-Phase-1 enhancements. These are intentional and currently active:
+
+1. Checkout persistence is API-backed (`/api/orders`) rather than `sessionStorage` as source of truth.
+2. Fulfillment supports both pickup and delivery (delivery uses estimated fee for now).
+3. Confirmation email is sent via Resend when configured.
+4. Owner/admin workflow includes status updates (packed, delivered, paid), archive/reopen, and pending payments queue.
+5. Order confirmation lookup requires both `orderId` and `orderNumber` for safer public access.
+
 ---
 
 ## 2. Brand Identity
