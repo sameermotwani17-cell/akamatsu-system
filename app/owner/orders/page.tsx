@@ -39,6 +39,9 @@ export default async function OwnerOrdersPage() {
             <Link href="/owner/payments" className="btn-secondary">
               {t("pendingPayments")} ({pendingPaymentsCount ?? 0})
             </Link>
+            <Link href="/owner/transactions" className="btn-secondary">
+              {t("financeDashboard")}
+            </Link>
           </div>
         </div>
 

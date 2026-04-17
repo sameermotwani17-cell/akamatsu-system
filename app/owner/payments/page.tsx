@@ -22,6 +22,11 @@ export default async function OwnerPaymentsPage() {
           <p className="font-sans text-sm text-muted-foreground mt-1">
             {t("paymentsSubtitle")}
           </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <Link href="/owner/transactions" className="btn-secondary">
+              {t("financeDashboard")}
+            </Link>
+          </div>
         </div>
 
         {error && (
