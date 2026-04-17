@@ -65,6 +65,9 @@ create table if not exists orders (
   currency text not null default 'JPY',
   payment_status text not null default 'pending' check (payment_status in ('pending', 'paid', 'failed', 'refunded')),
   order_status text not null default 'confirmed' check (order_status in ('confirmed', 'ready', 'completed', 'cancelled')),
+  packed_at timestamptz,
+  delivered_at timestamptz,
+  archived_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -126,6 +129,24 @@ create table if not exists payment_events (
 );
 
 -- =====================
+-- PAYMENT TRANSACTIONS (admin/payment operations)
+-- =====================
+create table if not exists payment_transactions (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references orders(id) on delete cascade,
+  provider text not null default 'manual',
+  method text,
+  status text not null default 'pending' check (status in ('pending', 'paid', 'failed', 'refunded')),
+  amount integer not null check (amount >= 0),
+  currency text not null default 'JPY',
+  reference text,
+  metadata jsonb not null default '{}'::jsonb,
+  processed_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- =====================
 -- ROW LEVEL SECURITY
 -- =====================
 alter table products enable row level security;
@@ -134,6 +155,7 @@ alter table order_items enable row level security;
 alter table cart_items enable row level security;
 alter table reviews enable row level security;
 alter table payment_events enable row level security;
+alter table payment_transactions enable row level security;
 
 -- Products: public read
 drop policy if exists "Products are publicly viewable" on products;
@@ -195,8 +217,13 @@ create index if not exists idx_products_stock on products(stock_quantity);
 create index if not exists idx_orders_created_at on orders(created_at desc);
 create index if not exists idx_orders_email on orders(email);
 create index if not exists idx_orders_user_id on orders(user_id);
+create index if not exists idx_orders_order_status on orders(order_status);
+create index if not exists idx_orders_payment_status on orders(payment_status);
+create index if not exists idx_orders_archived_at on orders(archived_at);
 create index if not exists idx_order_items_order_id on order_items(order_id);
 create index if not exists idx_reviews_product on reviews(product_id);
 create index if not exists idx_cart_session on cart_items(session_id);
 create index if not exists idx_cart_user on cart_items(user_id);
 create index if not exists idx_payment_events_order_id on payment_events(order_id);
+create index if not exists idx_payment_transactions_order_id on payment_transactions(order_id);
+create index if not exists idx_payment_transactions_status on payment_transactions(status);

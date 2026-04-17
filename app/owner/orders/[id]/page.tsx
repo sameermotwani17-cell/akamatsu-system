@@ -47,6 +47,9 @@ export default async function OwnerOrderDetailPage({ params }: Props) {
           <ChevronLeft className="h-4 w-4" />
           Back to orders
         </Link>
+        <Link href="/owner/payments" className="inline-flex items-center gap-1.5 font-sans text-sm text-muted-foreground hover:text-brand-red transition-colors">
+          Pending payments
+        </Link>
 
         <div className="rounded-2xl border border-brand-cream-dark bg-white p-6 shadow-sm">
           <h1 className="font-serif text-2xl font-bold text-foreground">

@@ -11,9 +11,10 @@ This folder is now in skeleton mode so development can continue before final inv
 
 1. Run `schema.sql` in Supabase SQL editor.
 2. Run `seed.sql` in Supabase SQL editor.
-3. Confirm sample products exist in `products` table.
-4. Build backend order creation against `orders` and `order_items`.
-5. Replace sample rows in `seed.sql` when real inventory master is available.
+3. For existing projects, run `sql/2026-04-17_owner_order_workflow.sql` once.
+4. Confirm sample products exist in `products` table.
+5. Build backend order creation against `orders` and `order_items`.
+6. Replace sample rows in `seed.sql` when real inventory master is available.
 
 ## Tables Included
 
@@ -23,6 +24,12 @@ This folder is now in skeleton mode so development can continue before final inv
 - `cart_items`: optional server-side cart sync.
 - `reviews`: customer reviews.
 - `payment_events`: future payment webhook/event logging.
+- `payment_transactions`: admin/payment operation records.
+
+## Owner Workflow Pages
+
+- `/owner/orders`: active + past orders.
+- `/owner/payments`: pending payment queue.
 
 ## What To Fill Later
 

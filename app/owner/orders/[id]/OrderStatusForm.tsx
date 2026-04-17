@@ -18,6 +18,28 @@ export function OrderStatusForm({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const quickAction = async (next: { orderStatus?: Props["initialOrderStatus"]; paymentStatus?: Props["initialPaymentStatus"] }) => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(next),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Update failed");
+      if (next.orderStatus) setOrderStatus(next.orderStatus);
+      if (next.paymentStatus) setPaymentStatus(next.paymentStatus);
+      setMessage("Status updated");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Update failed";
+      setMessage(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const onSave = async () => {
     setSaving(true);
     setMessage(null);
@@ -86,6 +108,33 @@ export function OrderStatusForm({
         {message && (
           <p className="font-sans text-sm text-muted-foreground">{message}</p>
         )}
+      </div>
+
+      <div className="pt-2 border-t border-brand-cream-dark">
+        <p className="font-sans text-sm font-medium text-foreground mb-2">Quick Actions</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => quickAction({ orderStatus: "ready" })}
+            disabled={saving}
+            className="btn-secondary"
+          >
+            Mark Packed
+          </button>
+          <button
+            onClick={() => quickAction({ orderStatus: "completed" })}
+            disabled={saving}
+            className="btn-secondary"
+          >
+            Mark Delivered
+          </button>
+          <button
+            onClick={() => quickAction({ paymentStatus: "paid" })}
+            disabled={saving}
+            className="btn-secondary"
+          >
+            Mark Paid
+          </button>
+        </div>
       </div>
     </div>
   );
