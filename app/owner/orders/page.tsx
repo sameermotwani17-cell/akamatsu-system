@@ -9,17 +9,21 @@ export default async function OwnerOrdersPage() {
     .from("orders")
     .select("id, order_number, customer_name, email, pickup_date, pickup_slot, total, payment_status, order_status, created_at")
     .in("order_status", ["confirmed", "ready"])
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
     .limit(200);
 
   const { data: pastOrders, error: pastError } = await supabase
-    .from("owner_past_orders")
+    .from("orders")
     .select("*")
+    .or("archived_at.not.is.null,order_status.eq.completed,order_status.eq.cancelled")
+    .order("updated_at", { ascending: false })
     .limit(200);
 
-  const { data: pendingPayments } = await supabase
-    .from("owner_pending_payments")
-    .select("order_id", { count: "exact", head: true });
+  const { count: pendingPaymentsCount } = await supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("payment_status", "pending");
 
   return (
     <div className="min-h-screen bg-brand-cream py-8">
@@ -31,7 +35,7 @@ export default async function OwnerOrdersPage() {
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <Link href="/owner/payments" className="btn-secondary">
-              Pending Payments ({pendingPayments?.length ?? 0})
+              Pending Payments ({pendingPaymentsCount ?? 0})
             </Link>
           </div>
         </div>
@@ -133,7 +137,7 @@ export default async function OwnerOrdersPage() {
                         {order.order_number ?? order.id}
                       </Link>
                       <p className="font-sans text-xs text-muted-foreground mt-0.5">
-                        {new Date(order.archived_or_updated_at).toLocaleString("ja-JP")}
+                        {new Date(order.updated_at ?? order.created_at).toLocaleString("ja-JP")}
                       </p>
                     </td>
                     <td className="px-4 py-3">

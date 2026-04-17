@@ -56,9 +56,10 @@ select
   o.total,
   o.payment_status,
   o.order_status,
-  coalesce(o.archived_at, o.updated_at, o.created_at) as archived_or_updated_at
+  coalesce(o.archived_at, o.updated_at) as archived_or_updated_at
 from orders o
-where o.order_status in ('completed', 'cancelled')
+where o.archived_at is not null
+   or o.order_status in ('completed', 'cancelled')
 order by archived_or_updated_at desc;
 
 commit;

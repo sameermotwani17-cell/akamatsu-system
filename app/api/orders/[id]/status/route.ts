@@ -17,14 +17,16 @@ export async function PATCH(req: Request, { params }: Params) {
   const payload = (await req.json()) as {
     orderStatus?: "confirmed" | "ready" | "completed" | "cancelled";
     paymentStatus?: "pending" | "paid" | "failed" | "refunded";
+    archiveAction?: "archive" | "reopen";
   };
 
-  if (!payload.orderStatus && !payload.paymentStatus) {
+  if (!payload.orderStatus && !payload.paymentStatus && !payload.archiveAction) {
     return NextResponse.json({ error: "No update fields provided" }, { status: 400 });
   }
 
   const updateData: Record<string, string | null> = {};
   const nowIso = new Date().toISOString();
+  const supabase = createAdminClient() as any;
 
   if (payload.orderStatus) updateData.order_status = payload.orderStatus;
   if (payload.paymentStatus) updateData.payment_status = payload.paymentStatus;
@@ -39,14 +41,32 @@ export async function PATCH(req: Request, { params }: Params) {
   if (payload.orderStatus === "cancelled") {
     updateData.archived_at = nowIso;
   }
+
+  if (payload.archiveAction === "archive") {
+    updateData.archived_at = nowIso;
+  }
+
+  if (payload.archiveAction === "reopen") {
+    updateData.archived_at = null;
+    const { data: currentOrder } = await supabase
+      .from("orders")
+      .select("order_status")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (currentOrder && ["completed", "cancelled"].includes(currentOrder.order_status)) {
+      updateData.order_status = "confirmed";
+      updateData.delivered_at = null;
+    }
+  }
+
   updateData.updated_at = nowIso;
 
-  const supabase = createAdminClient() as any;
   const { data, error } = await supabase
     .from("orders")
     .update(updateData)
     .eq("id", id)
-    .select("id, order_number, order_status, payment_status")
+    .select("id, order_number, order_status, payment_status, archived_at, packed_at, delivered_at")
     .single();
 
   if (error) {
@@ -54,13 +74,20 @@ export async function PATCH(req: Request, { params }: Params) {
   }
 
   if (payload.paymentStatus === "paid") {
+    const { data: existingPaidTx } = await supabase
+      .from("payment_transactions")
+      .select("id")
+      .eq("order_id", id)
+      .eq("status", "paid")
+      .limit(1);
+
     const { data: currentOrder } = await supabase
       .from("orders")
       .select("id, total")
       .eq("id", id)
       .maybeSingle();
 
-    if (currentOrder) {
+    if (currentOrder && !existingPaidTx?.length) {
       await supabase.from("payment_transactions").insert({
         order_id: currentOrder.id,
         provider: "manual",

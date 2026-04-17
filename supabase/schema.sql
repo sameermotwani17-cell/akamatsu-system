@@ -227,3 +227,38 @@ create index if not exists idx_cart_user on cart_items(user_id);
 create index if not exists idx_payment_events_order_id on payment_events(order_id);
 create index if not exists idx_payment_transactions_order_id on payment_transactions(order_id);
 create index if not exists idx_payment_transactions_status on payment_transactions(status);
+
+-- =====================
+-- OWNER VIEWS
+-- =====================
+create or replace view owner_pending_payments as
+select
+  o.id as order_id,
+  o.order_number,
+  o.customer_name,
+  o.email,
+  o.total,
+  o.currency,
+  o.payment_status,
+  o.order_status,
+  o.created_at,
+  o.updated_at
+from orders o
+where o.payment_status = 'pending';
+
+create or replace view owner_past_orders as
+select
+  o.id,
+  o.order_number,
+  o.customer_name,
+  o.email,
+  o.pickup_date,
+  o.pickup_slot,
+  o.total,
+  o.payment_status,
+  o.order_status,
+  coalesce(o.archived_at, o.updated_at) as archived_or_updated_at
+from orders o
+where o.archived_at is not null
+   or o.order_status in ('completed', 'cancelled')
+order by archived_or_updated_at desc;

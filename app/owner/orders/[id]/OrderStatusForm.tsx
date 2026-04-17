@@ -6,19 +6,26 @@ type Props = {
   orderId: string;
   initialOrderStatus: "confirmed" | "ready" | "completed" | "cancelled";
   initialPaymentStatus: "pending" | "paid" | "failed" | "refunded";
+  initialArchived: boolean;
 };
 
 export function OrderStatusForm({
   orderId,
   initialOrderStatus,
   initialPaymentStatus,
+  initialArchived,
 }: Props) {
   const [orderStatus, setOrderStatus] = useState(initialOrderStatus);
   const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
+  const [isArchived, setIsArchived] = useState(initialArchived);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const quickAction = async (next: { orderStatus?: Props["initialOrderStatus"]; paymentStatus?: Props["initialPaymentStatus"] }) => {
+  const quickAction = async (next: {
+    orderStatus?: Props["initialOrderStatus"];
+    paymentStatus?: Props["initialPaymentStatus"];
+    archiveAction?: "archive" | "reopen";
+  }) => {
     setSaving(true);
     setMessage(null);
     try {
@@ -31,6 +38,9 @@ export function OrderStatusForm({
       if (!res.ok) throw new Error(json.error || "Update failed");
       if (next.orderStatus) setOrderStatus(next.orderStatus);
       if (next.paymentStatus) setPaymentStatus(next.paymentStatus);
+      if (typeof json?.order?.archived_at !== "undefined") {
+        setIsArchived(Boolean(json.order.archived_at));
+      }
       setMessage("Status updated");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Update failed";
@@ -54,6 +64,9 @@ export function OrderStatusForm({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Update failed");
+      if (typeof json?.order?.archived_at !== "undefined") {
+        setIsArchived(Boolean(json.order.archived_at));
+      }
       setMessage("Status updated");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Update failed";
@@ -66,6 +79,9 @@ export function OrderStatusForm({
   return (
     <div className="rounded-xl border border-brand-cream-dark bg-white p-4 space-y-3">
       <h3 className="font-serif text-lg font-semibold text-foreground">Update Status</h3>
+      <p className="font-sans text-xs text-muted-foreground">
+        Archive state: {isArchived ? "Archived" : "Active"}
+      </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="font-sans text-sm text-foreground">
@@ -134,6 +150,23 @@ export function OrderStatusForm({
           >
             Mark Paid
           </button>
+          {!isArchived ? (
+            <button
+              onClick={() => quickAction({ archiveAction: "archive" })}
+              disabled={saving}
+              className="btn-secondary"
+            >
+              Archive
+            </button>
+          ) : (
+            <button
+              onClick={() => quickAction({ archiveAction: "reopen" })}
+              disabled={saving}
+              className="btn-secondary"
+            >
+              Reopen
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -6,8 +6,10 @@ export default async function OwnerPaymentsPage() {
   const supabase = createAdminClient() as any;
 
   const { data, error } = await supabase
-    .from("owner_pending_payments")
-    .select("*")
+    .from("orders")
+    .select("id, order_number, customer_name, email, total, payment_status, created_at")
+    .eq("payment_status", "pending")
+    .order("created_at", { ascending: false })
     .limit(300);
 
   return (
@@ -39,10 +41,10 @@ export default async function OwnerPaymentsPage() {
               </thead>
               <tbody>
                 {(data ?? []).map((item: any) => (
-                  <tr key={item.order_id} className="border-b border-brand-cream-dark last:border-0 hover:bg-brand-cream/30">
+                  <tr key={item.id} className="border-b border-brand-cream-dark last:border-0 hover:bg-brand-cream/30">
                     <td className="px-4 py-3">
-                      <Link href={`/owner/orders/${item.order_id}`} className="font-sans text-sm font-semibold text-brand-red hover:underline">
-                        {item.order_number ?? item.order_id}
+                      <Link href={`/owner/orders/${item.id}`} className="font-sans text-sm font-semibold text-brand-red hover:underline">
+                        {item.order_number ?? item.id}
                       </Link>
                       <p className="font-sans text-xs text-muted-foreground mt-0.5">
                         {new Date(item.created_at).toLocaleString("ja-JP")}
