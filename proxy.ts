@@ -9,8 +9,15 @@ export function proxy(request: NextRequest) {
   const locale = request.cookies.get("locale")?.value ?? "ja";
   const validLocale = ["ja", "en"].includes(locale) ? locale : "ja";
 
-  const response = NextResponse.next();
-  response.headers.set("x-locale", validLocale);
+  // Pass locale downstream as a request header for next-intl request config.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-locale", validLocale);
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
   return response;
 }
 
