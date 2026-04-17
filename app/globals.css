@@ -1,26 +1,268 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap");
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── Tailwind v4 Theme ─────────────────────────────────────────────────── */
+@theme {
+  /* Brand palette */
+  --color-brand-red:        #C0392B;
+  --color-brand-red-dark:   #A93226;
+  --color-brand-red-light:  #E74C3C;
+  --color-brand-cream:      #FAF7F2;
+  --color-brand-cream-dark: #EDE8DF;
+  --color-brand-stone:      #8B7355;
+  --color-brand-gold:       #C9A84C;
+  --color-brand-gold-light: #E8C76A;
+
+  /* Semantic tokens */
+  --color-border:           #EDE8DF;
+  --color-input:            #EDE8DF;
+  --color-background:       #FAF7F2;
+  --color-foreground:       #2C2416;
+  --color-muted:            #F0EBE3;
+  --color-muted-foreground: #7A6A58;
+  --color-primary:          #C0392B;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary:        #EDE8DF;
+  --color-secondary-foreground: #4A3D2E;
+  --color-accent:           #E2D9CE;
+  --color-accent-foreground: #2C2416;
+  --color-destructive:      #C0392B;
+  --color-destructive-foreground: #FFFFFF;
+  --color-card:             #FFFFFF;
+  --color-card-foreground:  #2C2416;
+  --color-popover:          #FFFFFF;
+  --color-popover-foreground: #2C2416;
+  --color-ring:             #C0392B;
+
+  /* Typography */
+  --font-sans:   "Noto Sans JP", sans-serif;
+  --font-serif:  "Noto Serif JP", serif;
+  --font-display: "Noto Serif JP", serif;
+  --font-mono:   "Courier New", monospace;
+
+  /* Border radius */
+  --radius:    0.75rem;
+  --radius-lg: 0.75rem;
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
+
+  /* Keyframes */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up:   accordion-up 0.2s ease-out;
+  --animate-fade-in:        fade-in 0.5s ease-out forwards;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes accordion-down {
+  from { height: 0; }
+  to   { height: var(--radix-accordion-content-height); }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to   { height: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── Base layer ────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "palt" 1;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-serif);
+    font-feature-settings: "palt" 1;
+  }
+
+  ::selection {
+    background-color: rgba(192, 57, 43, 0.18);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Component shortcuts ───────────────────────────────────────────────── */
+@layer components {
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius);
+    background-color: var(--color-brand-red);
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: #fff;
+    transition: background-color 0.2s, transform 0.2s;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+  }
+  .btn-primary:hover  { background-color: var(--color-brand-red-dark); transform: scale(1.02); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-primary:focus-visible {
+    outline: 2px solid var(--color-brand-red);
+    outline-offset: 2px;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius);
+    border: 2px solid var(--color-brand-red);
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--color-brand-red);
+    background: transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-secondary:hover  { background-color: var(--color-brand-red); color: #fff; transform: scale(1.02); }
+  .btn-secondary:active { transform: scale(0.98); }
+  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .badge-organic {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #f0fdf4;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+
+  .badge-gluten-free {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #fffbeb;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+
+  .badge-vegan {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #ecfdf5;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+
+  .badge-no-additives {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background-color: #eff6ff;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+
+  .product-card {
+    background: #fff;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    border: 1px solid var(--color-brand-cream-dark);
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+  .product-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-4px);
+  }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  @media (min-width: 768px) {
+    .section-title { font-size: 1.875rem; }
+  }
+
+  .container-padded {
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-padded { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .container-padded { padding-left: 2rem; padding-right: 2rem; }
+  }
 }
+
+/* ─── Utilities ─────────────────────────────────────────────────────────── */
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+}
+
+/* ─── Staggered animation delays ────────────────────────────────────────── */
+.product-grid-item:nth-child(1) { animation-delay: 0ms; }
+.product-grid-item:nth-child(2) { animation-delay: 60ms; }
+.product-grid-item:nth-child(3) { animation-delay: 120ms; }
+.product-grid-item:nth-child(4) { animation-delay: 180ms; }
+.product-grid-item:nth-child(5) { animation-delay: 240ms; }
+.product-grid-item:nth-child(6) { animation-delay: 300ms; }
+.product-grid-item:nth-child(7) { animation-delay: 360ms; }
+.product-grid-item:nth-child(8) { animation-delay: 420ms; }

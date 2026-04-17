@@ -1,65 +1,103 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import { useTranslations } from "next-intl";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { CategoryGrid } from "@/components/landing/CategoryGrid";
+import { ProductRail } from "@/components/landing/ProductRail";
+import { TrustBar } from "@/components/landing/TrustBar";
+import { InStoreNow } from "@/components/landing/InStoreNow";
+import { getMockProducts } from "@/lib/mock-data";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "赤松 Health & Lifestyle | 自然の恵みで、毎日を豊かに",
+  description:
+    "オーガニック・グルテンフリーの健康食品、サプリメント、ビューティー商品。地元の健康ショップが自信を持ってお届けします。",
+};
+
+export default function LandingPage() {
+  const t = useTranslations("landing");
+  const topProducts = getMockProducts({ limit: 8, sort: "bestseller" });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <HeroSection />
+      <TrustBar />
+      <InStoreNow />
+      <CategoryGrid />
+      <ProductRail
+        products={topProducts}
+        title={t("popular_title")}
+        titleSub={t("popular_subtitle")}
+        viewAllHref="/shop"
+      />
+
+      {/* Organic/Natural editorial section */}
+      <section className="py-16 bg-white" aria-labelledby="story-heading">
+        <div className="container-padded">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full bg-green-50 border border-green-200 px-3 py-1">
+                <span className="text-green-600 text-sm">🌿</span>
+                <span className="font-sans text-xs font-medium text-green-700">
+                  {t("story_badge")}
+                </span>
+              </div>
+              <h2
+                id="story-heading"
+                className="font-serif text-3xl md:text-4xl font-semibold text-foreground leading-tight"
+              >
+                {t("story_title_1")}
+                <br />
+                {t("story_title_2")}
+              </h2>
+              <p className="font-sans text-base text-muted-foreground leading-relaxed">
+                {t("story_body1")}
+              </p>
+              <p className="font-sans text-sm text-muted-foreground leading-relaxed">
+                {t("story_body2")}
+              </p>
+              <div className="grid grid-cols-3 gap-4 pt-2">
+                {[
+                  { num: t("stat1_num"), label: t("stat1_label"), sub: t("stat1_sub") },
+                  { num: t("stat2_num"), label: t("stat2_label"), sub: t("stat2_sub") },
+                  { num: t("stat3_num"), label: t("stat3_label"), sub: t("stat3_sub") },
+                ].map((stat) => (
+                  <div key={stat.label} className="text-center">
+                    <div className="font-serif text-2xl font-bold text-brand-red">
+                      {stat.num}
+                    </div>
+                    <div className="font-sans text-xs font-medium text-foreground mt-0.5">
+                      {stat.label}
+                    </div>
+                    <div className="font-sans text-[10px] text-muted-foreground">
+                      {stat.sub}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Visual grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
+                <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-green-100 to-green-200 overflow-hidden">
+                  <div className="h-full flex items-center justify-center text-6xl">🌿</div>
+                </div>
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 overflow-hidden">
+                  <div className="h-full flex items-center justify-center text-5xl">🌾</div>
+                </div>
+              </div>
+              <div className="space-y-3 pt-6">
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-brand-red/10 to-brand-red/20 overflow-hidden">
+                  <div className="h-full flex items-center justify-center text-5xl">🍵</div>
+                </div>
+                <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
+                  <div className="h-full flex items-center justify-center text-6xl">💧</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }
