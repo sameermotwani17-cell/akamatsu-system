@@ -8,6 +8,7 @@ type Props = {
   initialOrderStatus: "confirmed" | "ready" | "completed" | "cancelled";
   initialPaymentStatus: "pending" | "paid" | "failed" | "refunded";
   initialArchived: boolean;
+  initialPickedUpAt: string | null;
 };
 
 export function OrderStatusForm({
@@ -15,11 +16,13 @@ export function OrderStatusForm({
   initialOrderStatus,
   initialPaymentStatus,
   initialArchived,
+  initialPickedUpAt,
 }: Props) {
   const t = useTranslations("ownerStatus");
   const [orderStatus, setOrderStatus] = useState(initialOrderStatus);
   const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
   const [isArchived, setIsArchived] = useState(initialArchived);
+  const [pickedUpAt, setPickedUpAt] = useState<string | null>(initialPickedUpAt);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -27,6 +30,7 @@ export function OrderStatusForm({
     orderStatus?: Props["initialOrderStatus"];
     paymentStatus?: Props["initialPaymentStatus"];
     archiveAction?: "archive" | "reopen";
+    pickedUp?: boolean;
   }) => {
     setSaving(true);
     setMessage(null);
@@ -42,6 +46,9 @@ export function OrderStatusForm({
       if (next.paymentStatus) setPaymentStatus(next.paymentStatus);
       if (typeof json?.order?.archived_at !== "undefined") {
         setIsArchived(Boolean(json.order.archived_at));
+      }
+      if (typeof json?.order?.delivered_at !== "undefined") {
+        setPickedUpAt(json.order.delivered_at);
       }
       setMessage(t("statusUpdated"));
     } catch (error) {
@@ -69,6 +76,9 @@ export function OrderStatusForm({
       if (typeof json?.order?.archived_at !== "undefined") {
         setIsArchived(Boolean(json.order.archived_at));
       }
+      if (typeof json?.order?.delivered_at !== "undefined") {
+        setPickedUpAt(json.order.delivered_at);
+      }
       setMessage(t("statusUpdated"));
     } catch (error) {
       const msg = error instanceof Error ? error.message : t("updateFailed");
@@ -84,6 +94,19 @@ export function OrderStatusForm({
       <p className="font-sans text-xs text-muted-foreground">
         {t("archiveState")}: {isArchived ? t("archived") : t("active")}
       </p>
+      <label className="flex items-center gap-2 font-sans text-sm text-foreground">
+        <input
+          type="checkbox"
+          checked={Boolean(pickedUpAt)}
+          onChange={(e) => quickAction({ pickedUp: e.target.checked })}
+          disabled={saving}
+          className="h-4 w-4 rounded border-brand-cream-dark text-brand-red focus:ring-brand-red"
+        />
+        <span>{t("pickedUpCheckbox")}</span>
+        {pickedUpAt ? (
+          <span className="text-xs text-muted-foreground">({new Date(pickedUpAt).toLocaleString("ja-JP")})</span>
+        ) : null}
+      </label>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="font-sans text-sm text-foreground">

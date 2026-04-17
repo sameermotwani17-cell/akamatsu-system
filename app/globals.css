@@ -238,9 +238,9 @@
 
 /* ─── Utilities ─────────────────────────────────────────────────────────── */
 @layer utilities {
-  .text-balance { text-wrap: balance; }
+  .text-balance { overflow-wrap: anywhere; }
 
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide { -ms-overflow-style: none; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
 
   .line-clamp-2 {
@@ -248,12 +248,14 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
   .line-clamp-1 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
 }
 

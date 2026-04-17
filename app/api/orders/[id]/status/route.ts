@@ -18,9 +18,10 @@ export async function PATCH(req: Request, { params }: Params) {
     orderStatus?: "confirmed" | "ready" | "completed" | "cancelled";
     paymentStatus?: "pending" | "paid" | "failed" | "refunded";
     archiveAction?: "archive" | "reopen";
+    pickedUp?: boolean;
   };
 
-  if (!payload.orderStatus && !payload.paymentStatus && !payload.archiveAction) {
+  if (!payload.orderStatus && !payload.paymentStatus && !payload.archiveAction && typeof payload.pickedUp !== "boolean") {
     return NextResponse.json({ error: "No update fields provided" }, { status: 400 });
   }
 
@@ -57,6 +58,27 @@ export async function PATCH(req: Request, { params }: Params) {
     if (currentOrder && ["completed", "cancelled"].includes(currentOrder.order_status)) {
       updateData.order_status = "confirmed";
       updateData.delivered_at = null;
+    }
+  }
+
+  if (payload.pickedUp === true) {
+    updateData.delivered_at = nowIso;
+    updateData.order_status = "completed";
+    updateData.archived_at = nowIso;
+  }
+
+  if (payload.pickedUp === false) {
+    updateData.delivered_at = null;
+    updateData.archived_at = null;
+
+    const { data: currentOrder } = await supabase
+      .from("orders")
+      .select("order_status")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (currentOrder?.order_status === "completed") {
+      updateData.order_status = "ready";
     }
   }
 

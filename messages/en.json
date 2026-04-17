@@ -285,6 +285,7 @@
     "markPaid": "Mark Paid",
     "archive": "Archive",
     "reopen": "Reopen",
+    "pickedUpCheckbox": "Picked up",
     "updateFailed": "Update failed",
     "orderStatusConfirmed": "confirmed",
     "orderStatusReady": "ready",

@@ -81,6 +81,7 @@ export default async function OwnerOrderDetailPage({ params }: Props) {
           initialOrderStatus={order.order_status}
           initialPaymentStatus={order.payment_status}
           initialArchived={Boolean(order.archived_at)}
+          initialPickedUpAt={order.delivered_at ?? null}
         />
 
         <div className="rounded-2xl border border-brand-cream-dark bg-white p-6 shadow-sm">

@@ -285,6 +285,7 @@
     "markPaid": "決済済みにする",
     "archive": "アーカイブ",
     "reopen": "再開",
+    "pickedUpCheckbox": "受取済み",
     "updateFailed": "更新に失敗しました",
     "orderStatusConfirmed": "受付済み",
     "orderStatusReady": "梱包済み",
