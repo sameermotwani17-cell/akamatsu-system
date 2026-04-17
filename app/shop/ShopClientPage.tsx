@@ -279,6 +279,8 @@ export function ShopClientPage({ initialParams }: ShopClientPageProps) {
                   <button
                     onClick={() => setMobileFiltersOpen(false)}
                     className="rounded-lg p-1.5 hover:bg-brand-cream"
+                    aria-label={t("filters.close")}
+                    title={t("filters.close")}
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -304,6 +306,8 @@ export function ShopClientPage({ initialParams }: ShopClientPageProps) {
                 value={filters.sort}
                 onChange={(e) => setFilters((f) => ({ ...f, sort: e.target.value }))}
                 className="appearance-none rounded-lg border border-brand-cream-dark bg-white px-3 py-1.5 text-sm font-sans outline-none focus:ring-2 focus:ring-brand-red"
+                aria-label={t("filters.sort")}
+                title={t("filters.sort")}
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>

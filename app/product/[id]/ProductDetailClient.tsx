@@ -77,6 +77,18 @@ export function ProductDetailClient({ product, reviews, related }: ProductDetail
     { stars: 1, pct: 2 },
   ];
 
+  const getReviewBarWidthClass = (pct: number) => {
+    if (pct >= 95) return "w-full";
+    if (pct >= 85) return "w-5/6";
+    if (pct >= 70) return "w-3/4";
+    if (pct >= 55) return "w-2/3";
+    if (pct >= 45) return "w-1/2";
+    if (pct >= 30) return "w-1/3";
+    if (pct >= 15) return "w-1/4";
+    if (pct > 0) return "w-[10%]";
+    return "w-0";
+  };
+
   const TABS: { key: Tab; label: string }[] = [
     { key: "description", label: t("product.description") },
     { key: "ingredients", label: t("product.ingredients") },
@@ -297,7 +309,6 @@ export function ProductDetailClient({ product, reviews, related }: ProductDetail
               <button
                 key={tab.key}
                 role="tab"
-                aria-selected={activeTab === tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
                   "flex-shrink-0 px-5 py-3 font-sans text-sm font-medium transition-all border-b-2 -mb-px",
@@ -367,8 +378,7 @@ export function ProductDetailClient({ product, reviews, related }: ProductDetail
                         </span>
                         <div className="flex-1 h-2 rounded-full bg-brand-cream-dark overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-brand-gold"
-                            style={{ width: `${pct}%` }}
+                            className={cn("h-full rounded-full bg-brand-gold", getReviewBarWidthClass(pct))}
                           />
                         </div>
                         <span className="font-sans text-xs text-muted-foreground w-8">

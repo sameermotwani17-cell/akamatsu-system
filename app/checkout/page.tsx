@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/store/cart";
-import { formatPrice, generateOrderId, getBusinessDays } from "@/lib/utils";
+import { formatPrice, getBusinessDays } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -133,7 +133,6 @@ function OrderSummaryPanel({ compact = false }: { compact?: boolean }) {
           "w-full flex items-center justify-between p-4",
           compact && "cursor-pointer hover:bg-brand-cream/50 transition-colors"
         )}
-        aria-expanded={open}
       >
         <span className="font-serif text-base font-semibold">
           注文内容 / Order Summary
@@ -777,6 +776,13 @@ export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCartStore();
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [idempotencyKey] = useState(
+    () =>
+      (typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `akm-${Date.now()}-${Math.random().toString(16).slice(2)}`)
+  );
 
   const [state, setState] = useState<CheckoutState>({
     customer: { lastName: "", firstName: "", email: "", phone: "", isGuest: true, password: "" },
@@ -795,27 +801,50 @@ export default function CheckoutPage() {
   }, []);
 
   const handlePlaceOrder = async () => {
+    setSubmitError(null);
     setIsProcessing(true);
-    // AirPay stub — simulate 1.5s processing
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idempotencyKey,
+          customer: {
+            firstName: state.customer.firstName,
+            lastName: state.customer.lastName,
+            email: state.customer.email,
+            phone: state.customer.phone,
+          },
+          pickup: {
+            date: state.pickup.date,
+            slot: state.pickup.slot,
+          },
+          items: items.map((item) => ({
+            productId: item.productId,
+            name_ja: item.name_ja,
+            name_en: item.name_en,
+            quantity: item.quantity,
+            price: item.price,
+            image_url: item.image_url,
+            variant: item.variant,
+          })),
+        }),
+      });
 
-    const orderId = generateOrderId();
-    const orderData = {
-      orderId,
-      customerName: `${state.customer.lastName} ${state.customer.firstName}`,
-      email: state.customer.email,
-      phone: state.customer.phone,
-      pickupDate: state.pickup.date,
-      pickupSlot: state.pickup.slot,
-      items,
-      subtotal: subtotal(),
-      total: subtotal(),
-    };
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to place order");
+      }
 
-    // Persist to sessionStorage for confirmation page
-    sessionStorage.setItem("lastOrder", JSON.stringify(orderData));
-    clearCart();
-    router.push("/order-confirmation");
+      clearCart();
+      router.push(`/order-confirmation?orderId=${encodeURIComponent(result.id)}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "注文の作成に失敗しました。";
+      setSubmitError(message);
+      setIsProcessing(false);
+    }
   };
 
   // Guard empty cart
@@ -863,13 +892,22 @@ export default function CheckoutPage() {
                 />
               )}
               {step === 3 && (
-                <PaymentForm
-                  data={state.payment}
-                  onChange={updatePayment}
-                  onNext={handlePlaceOrder}
-                  onBack={() => setStep(2)}
-                  isProcessing={isProcessing}
-                />
+                <>
+                  <PaymentForm
+                    data={state.payment}
+                    onChange={updatePayment}
+                    onNext={handlePlaceOrder}
+                    onBack={() => setStep(2)}
+                    isProcessing={isProcessing}
+                  />
+                  {submitError && (
+                    <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                      <p className="font-sans text-sm text-red-700">
+                        {submitError}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

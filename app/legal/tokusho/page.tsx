@@ -46,7 +46,7 @@ export default function TokushoPage() {
             Specified Commercial Transactions Act Disclosure
           </p>
 
-          <div className="divide-y divide-brand-cream-dark">
+          <dl className="divide-y divide-brand-cream-dark">
             {ROWS.map((row) => (
               <div
                 key={row.label}
@@ -60,7 +60,7 @@ export default function TokushoPage() {
                 </dd>
               </div>
             ))}
-          </div>
+          </dl>
 
           <div className="mt-8 rounded-xl bg-brand-cream border border-brand-cream-dark p-4">
             <p className="font-sans text-xs text-muted-foreground leading-relaxed">

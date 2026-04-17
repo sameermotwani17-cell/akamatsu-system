@@ -1,21 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle, Store, Calendar, Clock, ShoppingBag, Mail, QrCode } from "lucide-react";
+import { CheckCircle, Store, Calendar, Clock, ShoppingBag, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { formatPrice } from "@/lib/utils";
-import type { CartLineItem } from "@/lib/store/cart";
+type ApiOrderItem = {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  product_name_ja: string;
+  product_name_en: string;
+  variant: string | null;
+  quantity: number;
+  unit_price: number;
+  line_total: number;
+  image_url: string | null;
+};
 
 type OrderData = {
   orderId: string;
+  orderNumber: string;
   customerName: string;
   email: string;
   phone: string;
   pickupDate: string;
   pickupSlot: string;
-  items: CartLineItem[];
+  items: ApiOrderItem[];
   subtotal: number;
   total: number;
 };
@@ -39,8 +52,7 @@ function QRCodeMock({ value }: { value: string }) {
 
   return (
     <div
-      className="inline-grid rounded-lg border-4 border-white bg-white p-2 shadow-sm"
-      style={{ gridTemplateColumns: `repeat(${size}, 1fr)`, gap: "1px" }}
+      className="inline-grid grid-cols-8 gap-px rounded-lg border-4 border-white bg-white p-2 shadow-sm"
       aria-label={`QR Code for order ${value}`}
     >
       {pattern.map((filled, i) => (
@@ -55,18 +67,56 @@ function QRCodeMock({ value }: { value: string }) {
 
 export default function OrderConfirmationPage() {
   const t = useTranslations("confirmation");
+  const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem("lastOrder");
-    if (raw) {
-      try {
-        setOrder(JSON.parse(raw));
-      } catch {
-        /* ignore */
-      }
+    const orderId = searchParams.get("orderId");
+    if (!orderId) {
+      setLoading(false);
+      return;
     }
-  }, []);
+
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || "Failed to load order");
+
+        if (!mounted) return;
+        setOrder({
+          orderId: json.order.id,
+          orderNumber: json.order.order_number ?? json.order.id,
+          customerName: json.order.customer_name,
+          email: json.order.email,
+          phone: json.order.phone,
+          pickupDate: json.order.pickup_date,
+          pickupSlot: json.order.pickup_slot,
+          items: json.items ?? [],
+          subtotal: json.order.subtotal,
+          total: json.order.total,
+        });
+      } catch {
+        if (mounted) setOrder(null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [searchParams]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4">
+        <p className="font-sans text-muted-foreground">Loading order...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -117,7 +167,7 @@ export default function OrderConfirmationPage() {
           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white border border-brand-cream-dark px-5 py-2 shadow-sm">
             <span className="font-sans text-sm text-muted-foreground">{t("order_number")}:</span>
             <span className="font-serif font-bold text-brand-red tracking-wide">
-              {order.orderId}
+              {order.orderNumber}
             </span>
           </div>
         </div>
@@ -167,9 +217,9 @@ export default function OrderConfirmationPage() {
               <p className="font-sans text-xs text-muted-foreground text-center">
                 店頭でこのQRコードをご提示ください / Show this QR code in-store
               </p>
-              <QRCodeMock value={order.orderId} />
+              <QRCodeMock value={order.orderNumber} />
               <p className="font-mono text-sm font-bold text-foreground tracking-widest">
-                {order.orderId}
+                {order.orderNumber}
               </p>
             </div>
           </div>
@@ -184,13 +234,13 @@ export default function OrderConfirmationPage() {
             <div className="space-y-3">
               {order.items.map((item) => (
                 <div
-                  key={`${item.productId}-${item.variant ?? ""}`}
+                  key={item.id}
                   className="flex items-center gap-3"
                 >
                   <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-brand-cream flex-shrink-0 border border-brand-cream-dark">
                     <Image
                       src={item.image_url || "/placeholder-product.jpg"}
-                      alt={item.name_ja}
+                      alt={item.product_name_ja}
                       fill
                       sizes="56px"
                       className="object-cover"
@@ -198,17 +248,17 @@ export default function OrderConfirmationPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-sans text-sm font-medium text-foreground line-clamp-1">
-                      {item.name_ja}
+                      {item.product_name_ja}
                     </p>
                     {item.variant && (
                       <p className="font-sans text-xs text-muted-foreground">{item.variant}</p>
                     )}
                     <p className="font-sans text-xs text-muted-foreground">
-                      {formatPrice(item.price)} × {item.quantity}
+                      {formatPrice(item.unit_price)} × {item.quantity}
                     </p>
                   </div>
                   <span className="font-serif text-sm font-semibold text-brand-red shrink-0">
-                    {formatPrice(item.price * item.quantity)}
+                    {formatPrice(item.line_total)}
                   </span>
                 </div>
               ))}
