@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isOwnerUser } from "@/lib/auth/owner";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -11,6 +12,9 @@ export async function PATCH(req: Request, { params }: Params) {
   const { data: authData } = await authClient.auth.getUser();
   if (!authData.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isOwnerUser(authData.user)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { id } = await params;

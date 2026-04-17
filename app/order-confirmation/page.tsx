@@ -82,7 +82,8 @@ export default function OrderConfirmationPage() {
 
   useEffect(() => {
     const orderId = searchParams.get("orderId");
-    if (!orderId) {
+    const orderNumber = searchParams.get("orderNumber");
+    if (!orderId || !orderNumber) {
       setLoading(false);
       return;
     }
@@ -90,7 +91,9 @@ export default function OrderConfirmationPage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
+        const res = await fetch(
+          `/api/orders/${encodeURIComponent(orderId)}?orderNumber=${encodeURIComponent(orderNumber)}`
+        );
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || (isJa ? "注文の読み込みに失敗しました" : "Failed to load order"));
 

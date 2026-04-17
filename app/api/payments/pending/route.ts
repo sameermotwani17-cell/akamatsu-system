@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isOwnerUser } from "@/lib/auth/owner";
 
 export async function GET() {
   const authClient = await createClient();
@@ -8,6 +9,9 @@ export async function GET() {
 
   if (!authData.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isOwnerUser(authData.user)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const supabase = createAdminClient() as any;

@@ -237,8 +237,15 @@ export async function POST(req: Request) {
         to: body.customer.email,
         customerName: `${body.customer.lastName} ${body.customer.firstName}`,
         orderNumber: createdOrder.order_number,
+        fulfillmentType,
         pickupDate: fulfillmentType === "pickup" ? pickupDate : "配送予定",
         pickupSlot: fulfillmentType === "pickup" ? pickupSlot : "配送",
+        deliveryAddress:
+          fulfillmentType === "delivery"
+            ? [body.delivery?.postalCode, body.delivery?.prefecture, body.delivery?.city, body.delivery?.addressLine1, body.delivery?.addressLine2]
+                .filter(Boolean)
+                .join(" ")
+            : undefined,
         total,
         currency: "JPY",
         items: normalizedItems.map((i) => ({

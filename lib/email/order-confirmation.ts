@@ -8,8 +8,10 @@ type SendOrderConfirmationInput = {
   to: string;
   customerName: string;
   orderNumber: string;
+  fulfillmentType: "pickup" | "delivery";
   pickupDate: string;
   pickupSlot: string;
+  deliveryAddress?: string;
   total: number;
   currency?: string;
   items: EmailOrderItem[];
@@ -42,8 +44,9 @@ function buildEmailText(input: SendOrderConfirmationInput) {
     "",
     "ご注文ありがとうございます。",
     `注文番号: ${input.orderNumber}`,
-    `受取日: ${input.pickupDate}`,
-    `受取時間: ${input.pickupSlot}`,
+    ...(input.fulfillmentType === "pickup"
+      ? [`受取日: ${input.pickupDate}`, `受取時間: ${input.pickupSlot}`]
+      : ["配送方法: 配送", `配送先: ${input.deliveryAddress ?? "未設定"}`]),
     "",
     "ご注文内容:",
     itemLines,
@@ -71,14 +74,13 @@ function buildEmailHtml(input: SendOrderConfirmationInput) {
     <p style="margin:0 0 16px;">ご注文を受け付けました。</p>
     <div style="background:#FAF7F2; border:1px solid #EDE8DF; border-radius:12px; padding:12px 14px; margin-bottom:16px;">
       <p style="margin:0;"><strong>注文番号:</strong> ${escapeHtml(input.orderNumber)}</p>
-      <p style="margin:0;"><strong>受取日:</strong> ${escapeHtml(input.pickupDate)}</p>
-      <p style="margin:0;"><strong>受取時間:</strong> ${escapeHtml(input.pickupSlot)}</p>
+      ${input.fulfillmentType === "pickup"
+        ? `<p style=\"margin:0;\"><strong>受取日:</strong> ${escapeHtml(input.pickupDate)}</p><p style=\"margin:0;\"><strong>受取時間:</strong> ${escapeHtml(input.pickupSlot)}</p>`
+        : `<p style=\"margin:0;\"><strong>配送方法:</strong> 配送</p><p style=\"margin:0;\"><strong>配送先:</strong> ${escapeHtml(input.deliveryAddress ?? "未設定")}</p>`}
     </div>
-    <div style="margin:0 0 16px; border:1px solid #EDE8DF; border-radius:12px; padding:12px; text-align:center; background:#FFFFFF;">
-      <p style="margin:0 0 8px; color:#7A6A58; font-size:13px;">店頭でこのQRコードをご提示ください / Show this QR code in-store</p>
-      <img src="${qrImageUrl}" width="170" height="170" alt="Order QR ${escapeHtml(input.orderNumber)}" style="display:block; margin:0 auto 8px; border-radius:10px; border:1px solid #EDE8DF;" />
-      <p style="margin:0; font-family: 'Courier New', monospace; font-weight:700; letter-spacing:1px;">${escapeHtml(input.orderNumber)}</p>
-    </div>
+    ${input.fulfillmentType === "pickup"
+      ? `<div style=\"margin:0 0 16px; border:1px solid #EDE8DF; border-radius:12px; padding:12px; text-align:center; background:#FFFFFF;\">\n      <p style=\"margin:0 0 8px; color:#7A6A58; font-size:13px;\">店頭でこのQRコードをご提示ください / Show this QR code in-store</p>\n      <img src=\"${qrImageUrl}\" width=\"170\" height=\"170\" alt=\"Order QR ${escapeHtml(input.orderNumber)}\" style=\"display:block; margin:0 auto 8px; border-radius:10px; border:1px solid #EDE8DF;\" />\n      <p style=\"margin:0; font-family: 'Courier New', monospace; font-weight:700; letter-spacing:1px;\">${escapeHtml(input.orderNumber)}</p>\n    </div>`
+      : ""}
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:12px;">
       <tbody>${itemRows}</tbody>
     </table>

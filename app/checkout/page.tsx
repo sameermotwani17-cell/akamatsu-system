@@ -1009,7 +1009,9 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      router.push(`/order-confirmation?orderId=${encodeURIComponent(result.id)}`);
+      router.push(
+        `/order-confirmation?orderId=${encodeURIComponent(result.id)}&orderNumber=${encodeURIComponent(result.orderNumber ?? "")}`
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : isJa ? "注文の作成に失敗しました。" : "Failed to create order.";
       setSubmitError(message);

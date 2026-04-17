@@ -6,13 +6,22 @@ type Params = {
 };
 
 export async function GET(_: Request, { params }: Params) {
+  const req = _;
   const { id } = await params;
+  const url = new URL(req.url);
+  const orderNumber = url.searchParams.get("orderNumber");
+
+  if (!orderNumber) {
+    return NextResponse.json({ error: "Missing orderNumber" }, { status: 400 });
+  }
+
   const supabase = createAdminClient() as any;
 
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .select("*")
     .eq("id", id)
+    .eq("order_number", orderNumber)
     .maybeSingle();
 
   if (orderError) {
