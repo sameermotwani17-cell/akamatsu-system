@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateOrderNumber, isUuid } from "@/lib/orders";
+import { sendOrderConfirmationEmail } from "@/lib/email/order-confirmation";
 
 type CreateOrderItem = {
   productId: string;
@@ -190,6 +191,26 @@ export async function POST(req: Request) {
       if (!p) continue;
       const newQty = Math.max(0, p.stock_quantity - item.quantity);
       await supabase.from("products").update({ stock_quantity: newQty }).eq("id", p.id);
+    }
+
+    try {
+      await sendOrderConfirmationEmail({
+        to: body.customer.email,
+        customerName: `${body.customer.lastName} ${body.customer.firstName}`,
+        orderNumber: createdOrder.order_number,
+        pickupDate: body.pickup.date,
+        pickupSlot: body.pickup.slot,
+        total,
+        currency: "JPY",
+        items: normalizedItems.map((i) => ({
+          nameJa: i.name_ja,
+          quantity: i.quantity,
+          lineTotal: i.lineTotal,
+        })),
+      });
+    } catch (emailError) {
+      // Do not fail order creation when email delivery fails.
+      console.error("Order confirmation email failed", emailError);
     }
 
     return NextResponse.json({
