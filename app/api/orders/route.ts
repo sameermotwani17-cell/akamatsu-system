@@ -15,6 +15,7 @@ type CreateOrderItem = {
 
 type CreateOrderBody = {
   idempotencyKey: string;
+  fulfillmentType?: "pickup" | "delivery";
   customer: {
     firstName: string;
     lastName: string;
@@ -25,8 +26,18 @@ type CreateOrderBody = {
     date: string;
     slot: string;
   };
+  delivery?: {
+    postalCode: string;
+    prefecture: string;
+    city: string;
+    addressLine1: string;
+    addressLine2?: string;
+    estimatedFee?: number;
+  };
   items: CreateOrderItem[];
 };
+
+const ESTIMATED_DELIVERY_FEE = 600;
 
 function badRequest(message: string) {
   return NextResponse.json({ error: message }, { status: 400 });
@@ -53,8 +64,21 @@ export async function POST(req: Request) {
     if (!body.customer?.phone) {
       return badRequest("Missing phone");
     }
-    if (!body.pickup?.date || !body.pickup?.slot) {
+    const fulfillmentType = body.fulfillmentType === "delivery" ? "delivery" : "pickup";
+
+    if (fulfillmentType === "pickup" && (!body.pickup?.date || !body.pickup?.slot)) {
       return badRequest("Missing pickup info");
+    }
+
+    if (fulfillmentType === "delivery") {
+      if (
+        !body.delivery?.postalCode ||
+        !body.delivery?.prefecture ||
+        !body.delivery?.city ||
+        !body.delivery?.addressLine1
+      ) {
+        return badRequest("Missing delivery address");
+      }
     }
     if (!body.items || body.items.length === 0) {
       return badRequest("Cart is empty");
@@ -118,8 +142,13 @@ export async function POST(req: Request) {
       };
     });
 
+    const pickupDate = body.pickup?.date ?? "";
+    const pickupSlot = body.pickup?.slot ?? "";
+
     const subtotal = normalizedItems.reduce((sum, i) => sum + i.lineTotal, 0);
-    const deliveryFee = 0;
+    const deliveryFee = fulfillmentType === "delivery"
+      ? Math.max(0, Math.trunc(body.delivery?.estimatedFee ?? ESTIMATED_DELIVERY_FEE))
+      : 0;
     const tax = 0;
     const total = subtotal + deliveryFee + tax;
 
@@ -140,9 +169,14 @@ export async function POST(req: Request) {
       customer_name: `${body.customer.lastName} ${body.customer.firstName}`,
       email: body.customer.email,
       phone: body.customer.phone,
-      fulfillment_type: "pickup",
-      pickup_date: body.pickup.date,
-      pickup_slot: body.pickup.slot,
+      fulfillment_type: fulfillmentType,
+      pickup_date: fulfillmentType === "pickup" ? pickupDate : null,
+      pickup_slot: fulfillmentType === "pickup" ? pickupSlot : null,
+      postal_code: fulfillmentType === "delivery" ? body.delivery?.postalCode : null,
+      prefecture: fulfillmentType === "delivery" ? body.delivery?.prefecture : null,
+      city: fulfillmentType === "delivery" ? body.delivery?.city : null,
+      address_line1: fulfillmentType === "delivery" ? body.delivery?.addressLine1 : null,
+      address_line2: fulfillmentType === "delivery" ? body.delivery?.addressLine2 ?? null : null,
       items: normalizedItems.map((i) => ({
         product_id: i.productId,
         name_ja: i.name_ja,
@@ -203,8 +237,8 @@ export async function POST(req: Request) {
         to: body.customer.email,
         customerName: `${body.customer.lastName} ${body.customer.firstName}`,
         orderNumber: createdOrder.order_number,
-        pickupDate: body.pickup.date,
-        pickupSlot: body.pickup.slot,
+        pickupDate: fulfillmentType === "pickup" ? pickupDate : "配送予定",
+        pickupSlot: fulfillmentType === "pickup" ? pickupSlot : "配送",
         total,
         currency: "JPY",
         items: normalizedItems.map((i) => ({

@@ -29,6 +29,14 @@ type PickupInfo = {
   slot: string;
 };
 
+type DeliveryInfo = {
+  postalCode: string;
+  prefecture: string;
+  city: string;
+  addressLine1: string;
+  addressLine2: string;
+};
+
 type PaymentInfo = {
   cardNumber: string;
   expiry: string;
@@ -38,9 +46,13 @@ type PaymentInfo = {
 
 type CheckoutState = {
   customer: CustomerInfo;
+  fulfillmentType: "pickup" | "delivery";
   pickup: PickupInfo;
+  delivery: DeliveryInfo;
   payment: PaymentInfo;
 };
+
+const ESTIMATED_DELIVERY_FEE = 600;
 
 const STEPS = [
   { id: 1, key: "customer_info", icon: User },
@@ -120,13 +132,22 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   );
 }
 
-function OrderSummaryPanel({ compact = false }: { compact?: boolean }) {
+function OrderSummaryPanel({
+  compact = false,
+  fulfillmentType,
+  deliveryFee,
+}: {
+  compact?: boolean;
+  fulfillmentType: "pickup" | "delivery";
+  deliveryFee: number;
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const isJa = locale === "ja";
   const { items, subtotal } = useCartStore();
   const [open, setOpen] = useState(!compact);
   const sub = subtotal();
+  const total = sub + deliveryFee;
 
   return (
     <div className="rounded-2xl bg-white border border-brand-cream-dark overflow-hidden shadow-sm">
@@ -190,7 +211,11 @@ function OrderSummaryPanel({ compact = false }: { compact?: boolean }) {
             </div>
             <div className="flex justify-between font-sans text-sm text-muted-foreground">
               <span>{t("cart.shipping")}</span>
-              <span className="text-green-600">{isJa ? "¥0（店舗受取）" : "¥0 (store pickup)"}</span>
+              <span className={deliveryFee === 0 ? "text-green-600" : "text-foreground"}>
+                {deliveryFee === 0
+                  ? (isJa ? "¥0（店舗受取）" : "¥0 (store pickup)")
+                  : `${formatPrice(deliveryFee)} ${isJa ? "（配送見積）" : "(estimated delivery)"}`}
+              </span>
             </div>
             <div className="flex justify-between font-sans text-xs text-muted-foreground">
               <span>{isJa ? "消費税" : "Tax"}</span>
@@ -200,7 +225,7 @@ function OrderSummaryPanel({ compact = false }: { compact?: boolean }) {
 
           <div className="border-t-2 border-foreground pt-3 flex justify-between">
             <span className="font-serif font-bold">{t("cart.total")}</span>
-            <span className="font-serif font-bold text-brand-red text-lg">{formatPrice(sub)}</span>
+            <span className="font-serif font-bold text-brand-red text-lg">{formatPrice(total)}</span>
           </div>
         </div>
       )}
@@ -397,29 +422,51 @@ function CustomerForm({
   );
 }
 
-function PickupForm({
-  data,
-  onChange,
+function FulfillmentForm({
+  fulfillmentType,
+  pickup,
+  delivery,
+  onFulfillmentTypeChange,
+  onPickupChange,
+  onDeliveryChange,
   onNext,
   onBack,
 }: {
-  data: PickupInfo;
-  onChange: (d: Partial<PickupInfo>) => void;
+  fulfillmentType: "pickup" | "delivery";
+  pickup: PickupInfo;
+  delivery: DeliveryInfo;
+  onFulfillmentTypeChange: (next: "pickup" | "delivery") => void;
+  onPickupChange: (d: Partial<PickupInfo>) => void;
+  onDeliveryChange: (d: Partial<DeliveryInfo>) => void;
   onNext: () => void;
   onBack: () => void;
 }) {
   const t = useTranslations("checkout");
   const locale = useLocale();
   const isJa = locale === "ja";
-  const [errors, setErrors] = useState<{ date?: string; slot?: string }>({});
+  const [errors, setErrors] = useState<{
+    date?: string;
+    slot?: string;
+    postalCode?: string;
+    prefecture?: string;
+    city?: string;
+    addressLine1?: string;
+  }>({});
   const businessDays = getBusinessDays(14);
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!data.date) e.date = isJa ? "受取日を選択してください" : "Please select a pickup date";
-    if (!data.slot) e.slot = isJa ? "受取時間を選択してください" : "Please select a pickup time";
+    if (fulfillmentType === "pickup") {
+      if (!pickup.date) e.date = isJa ? "受取日を選択してください" : "Please select a pickup date";
+      if (!pickup.slot) e.slot = isJa ? "受取時間を選択してください" : "Please select a pickup time";
+    } else {
+      if (!delivery.postalCode.trim()) e.postalCode = isJa ? "郵便番号を入力してください" : "Please enter postal code";
+      if (!delivery.prefecture.trim()) e.prefecture = isJa ? "都道府県を入力してください" : "Please enter prefecture";
+      if (!delivery.city.trim()) e.city = isJa ? "市区町村を入力してください" : "Please enter city";
+      if (!delivery.addressLine1.trim()) e.addressLine1 = isJa ? "住所を入力してください" : "Please enter address";
+    }
     setErrors(e);
-    return !e.date && !e.slot;
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -433,7 +480,37 @@ function PickupForm({
         {t("fulfillment")}
       </h2>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => onFulfillmentTypeChange("pickup")}
+          className={cn(
+            "rounded-xl border px-4 py-3 text-left transition-colors",
+            fulfillmentType === "pickup"
+              ? "border-brand-red bg-brand-red/5"
+              : "border-brand-cream-dark bg-white hover:border-brand-red/50"
+          )}
+        >
+          <p className="font-sans text-sm font-semibold text-foreground">{isJa ? "店舗受取" : "Store Pickup"}</p>
+          <p className="font-sans text-xs text-muted-foreground">{isJa ? "送料¥0" : "Shipping ¥0"}</p>
+        </button>
+        <button
+          type="button"
+          onClick={() => onFulfillmentTypeChange("delivery")}
+          className={cn(
+            "rounded-xl border px-4 py-3 text-left transition-colors",
+            fulfillmentType === "delivery"
+              ? "border-brand-red bg-brand-red/5"
+              : "border-brand-cream-dark bg-white hover:border-brand-red/50"
+          )}
+        >
+          <p className="font-sans text-sm font-semibold text-foreground">{isJa ? "配送" : "Delivery"}</p>
+          <p className="font-sans text-xs text-muted-foreground">{formatPrice(ESTIMATED_DELIVERY_FEE)} {isJa ? "（見積）" : "(estimated)"}</p>
+        </button>
+      </div>
+
       {/* Store info card */}
+      {fulfillmentType === "pickup" ? (
       <div className="rounded-xl border border-green-200 bg-green-50 p-4 space-y-2">
         <div className="flex items-start gap-3">
           <MapPin className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
@@ -473,16 +550,79 @@ function PickupForm({
           </span>
         </div>
       </div>
+      ) : (
+        <div className="rounded-xl border border-brand-cream-dark bg-brand-cream p-4 space-y-3">
+          <p className="font-sans text-sm font-semibold text-foreground">{isJa ? "配送先住所" : "Delivery Address"}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="postalCode" className="block font-sans text-xs text-muted-foreground mb-1">{isJa ? "郵便番号" : "Postal code"}</label>
+              <input
+                id="postalCode"
+                value={delivery.postalCode}
+                onChange={(e) => onDeliveryChange({ postalCode: e.target.value })}
+                placeholder={isJa ? "150-0001" : "150-0001"}
+                className={cn("w-full rounded-lg border bg-white px-3 py-2 font-sans text-sm outline-none focus:ring-2 focus:ring-brand-red", errors.postalCode ? "border-red-400" : "border-brand-cream-dark")}
+              />
+            </div>
+            <div>
+              <label htmlFor="prefecture" className="block font-sans text-xs text-muted-foreground mb-1">{isJa ? "都道府県" : "Prefecture"}</label>
+              <input
+                id="prefecture"
+                value={delivery.prefecture}
+                onChange={(e) => onDeliveryChange({ prefecture: e.target.value })}
+                placeholder={isJa ? "東京都" : "Tokyo"}
+                className={cn("w-full rounded-lg border bg-white px-3 py-2 font-sans text-sm outline-none focus:ring-2 focus:ring-brand-red", errors.prefecture ? "border-red-400" : "border-brand-cream-dark")}
+              />
+            </div>
+            <div>
+              <label htmlFor="city" className="block font-sans text-xs text-muted-foreground mb-1">{isJa ? "市区町村" : "City"}</label>
+              <input
+                id="city"
+                value={delivery.city}
+                onChange={(e) => onDeliveryChange({ city: e.target.value })}
+                placeholder={isJa ? "渋谷区" : "Shibuya"}
+                className={cn("w-full rounded-lg border bg-white px-3 py-2 font-sans text-sm outline-none focus:ring-2 focus:ring-brand-red", errors.city ? "border-red-400" : "border-brand-cream-dark")}
+              />
+            </div>
+            <div>
+              <label htmlFor="addressLine1" className="block font-sans text-xs text-muted-foreground mb-1">{isJa ? "番地" : "Address line 1"}</label>
+              <input
+                id="addressLine1"
+                value={delivery.addressLine1}
+                onChange={(e) => onDeliveryChange({ addressLine1: e.target.value })}
+                placeholder={isJa ? "神宮前1-2-3" : "1-2-3 Jingumae"}
+                className={cn("w-full rounded-lg border bg-white px-3 py-2 font-sans text-sm outline-none focus:ring-2 focus:ring-brand-red", errors.addressLine1 ? "border-red-400" : "border-brand-cream-dark")}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label htmlFor="addressLine2" className="block font-sans text-xs text-muted-foreground mb-1">{isJa ? "建物名・部屋番号（任意）" : "Address line 2 (optional)"}</label>
+              <input
+                id="addressLine2"
+                value={delivery.addressLine2}
+                onChange={(e) => onDeliveryChange({ addressLine2: e.target.value })}
+                placeholder={isJa ? "赤松ビル 1F" : "Akamatsu Building 1F"}
+                className="w-full rounded-lg border border-brand-cream-dark bg-white px-3 py-2 font-sans text-sm outline-none focus:ring-2 focus:ring-brand-red"
+              />
+            </div>
+          </div>
+          <p className="font-sans text-xs text-muted-foreground">
+            {isJa
+              ? `配送料は見積です。現在の想定: ${formatPrice(ESTIMATED_DELIVERY_FEE)}`
+              : `Delivery fee is estimated. Current estimate: ${formatPrice(ESTIMATED_DELIVERY_FEE)}`}
+          </p>
+        </div>
+      )}
 
       {/* Date picker */}
+      {fulfillmentType === "pickup" && (
       <div>
         <label htmlFor="pickupDate" className="block font-sans text-sm font-semibold text-foreground mb-2">
           {t("pickup_date")} <span className="text-brand-red" aria-hidden="true">*</span>
         </label>
         <select
           id="pickupDate"
-          value={data.date}
-          onChange={(e) => onChange({ date: e.target.value })}
+          value={pickup.date}
+          onChange={(e) => onPickupChange({ date: e.target.value })}
           className={cn(
             "w-full rounded-xl border bg-white px-4 py-3 font-sans text-sm outline-none focus:ring-2 focus:ring-brand-red transition-shadow appearance-none",
             errors.date ? "border-red-400" : "border-brand-cream-dark"
@@ -506,8 +646,10 @@ function PickupForm({
           <p className="mt-1 font-sans text-xs text-red-500" role="alert">{errors.date}</p>
         )}
       </div>
+      )}
 
       {/* Time slot */}
+      {fulfillmentType === "pickup" && (
       <div>
         <p className="font-sans text-sm font-semibold text-foreground mb-2">
           {t("pickup_time")} <span className="text-brand-red" aria-hidden="true">*</span>
@@ -518,7 +660,7 @@ function PickupForm({
               key={slot.value}
               className={cn(
                 "flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 cursor-pointer transition-all",
-                data.slot === slot.value
+                pickup.slot === slot.value
                   ? "border-brand-red bg-brand-red/5"
                   : "border-brand-cream-dark bg-white hover:border-brand-red/50"
               )}
@@ -527,17 +669,17 @@ function PickupForm({
                 type="radio"
                 name="timeSlot"
                 value={slot.value}
-                checked={data.slot === slot.value}
-                onChange={() => onChange({ slot: slot.value })}
+                checked={pickup.slot === slot.value}
+                onChange={() => onPickupChange({ slot: slot.value })}
                 className="sr-only"
               />
               <Clock className={cn(
                 "h-4 w-4",
-                data.slot === slot.value ? "text-brand-red" : "text-muted-foreground"
+                pickup.slot === slot.value ? "text-brand-red" : "text-muted-foreground"
               )} />
               <span className={cn(
                 "font-sans text-sm font-medium",
-                data.slot === slot.value ? "text-brand-red" : "text-foreground"
+                pickup.slot === slot.value ? "text-brand-red" : "text-foreground"
               )}>
                 {slot.label}
               </span>
@@ -548,6 +690,7 @@ function PickupForm({
           <p className="mt-1 font-sans text-xs text-red-500" role="alert">{errors.slot}</p>
         )}
       </div>
+      )}
 
       <div className="flex gap-3 pt-2">
         <button
@@ -797,7 +940,9 @@ export default function CheckoutPage() {
 
   const [state, setState] = useState<CheckoutState>({
     customer: { lastName: "", firstName: "", email: "", phone: "", isGuest: true, password: "" },
+    fulfillmentType: "pickup",
     pickup: { date: "", slot: "" },
+    delivery: { postalCode: "", prefecture: "", city: "", addressLine1: "", addressLine2: "" },
     payment: { cardNumber: "", expiry: "", cvv: "", cardName: "" },
   });
 
@@ -807,9 +952,14 @@ export default function CheckoutPage() {
   const updatePickup = useCallback((d: Partial<PickupInfo>) => {
     setState((s) => ({ ...s, pickup: { ...s.pickup, ...d } }));
   }, []);
+  const updateDelivery = useCallback((d: Partial<DeliveryInfo>) => {
+    setState((s) => ({ ...s, delivery: { ...s.delivery, ...d } }));
+  }, []);
   const updatePayment = useCallback((d: Partial<PaymentInfo>) => {
     setState((s) => ({ ...s, payment: { ...s.payment, ...d } }));
   }, []);
+
+  const deliveryFee = state.fulfillmentType === "delivery" ? ESTIMATED_DELIVERY_FEE : 0;
 
   const handlePlaceOrder = async () => {
     setSubmitError(null);
@@ -828,9 +978,18 @@ export default function CheckoutPage() {
             email: state.customer.email,
             phone: state.customer.phone,
           },
+          fulfillmentType: state.fulfillmentType,
           pickup: {
             date: state.pickup.date,
             slot: state.pickup.slot,
+          },
+          delivery: {
+            postalCode: state.delivery.postalCode,
+            prefecture: state.delivery.prefecture,
+            city: state.delivery.city,
+            addressLine1: state.delivery.addressLine1,
+            addressLine2: state.delivery.addressLine2,
+            estimatedFee: deliveryFee,
           },
           items: items.map((item) => ({
             productId: item.productId,
@@ -895,9 +1054,13 @@ export default function CheckoutPage() {
                 />
               )}
               {step === 2 && (
-                <PickupForm
-                  data={state.pickup}
-                  onChange={updatePickup}
+                <FulfillmentForm
+                  fulfillmentType={state.fulfillmentType}
+                  pickup={state.pickup}
+                  delivery={state.delivery}
+                  onFulfillmentTypeChange={(next) => setState((s) => ({ ...s, fulfillmentType: next }))}
+                  onPickupChange={updatePickup}
+                  onDeliveryChange={updateDelivery}
                   onNext={() => setStep(3)}
                   onBack={() => setStep(1)}
                 />
@@ -925,7 +1088,7 @@ export default function CheckoutPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-2 space-y-4">
-            <OrderSummaryPanel compact />
+            <OrderSummaryPanel compact fulfillmentType={state.fulfillmentType} deliveryFee={deliveryFee} />
 
             {/* Trust signals */}
             <div className="rounded-2xl bg-white border border-brand-cream-dark p-4 space-y-2">

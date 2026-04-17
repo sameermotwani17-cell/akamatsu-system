@@ -26,8 +26,15 @@ type OrderData = {
   customerName: string;
   email: string;
   phone: string;
+  fulfillmentType: "pickup" | "delivery";
   pickupDate: string;
   pickupSlot: string;
+  postalCode: string | null;
+  prefecture: string | null;
+  city: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  deliveryFee: number;
   items: ApiOrderItem[];
   subtotal: number;
   total: number;
@@ -94,8 +101,15 @@ export default function OrderConfirmationPage() {
           customerName: json.order.customer_name,
           email: json.order.email,
           phone: json.order.phone,
+          fulfillmentType: json.order.fulfillment_type === "delivery" ? "delivery" : "pickup",
           pickupDate: json.order.pickup_date,
           pickupSlot: json.order.pickup_slot,
+          postalCode: json.order.postal_code,
+          prefecture: json.order.prefecture,
+          city: json.order.city,
+          addressLine1: json.order.address_line1,
+          addressLine2: json.order.address_line2,
+          deliveryFee: json.order.delivery_fee ?? 0,
           items: json.items ?? [],
           subtotal: json.order.subtotal,
           total: json.order.total,
@@ -136,12 +150,14 @@ export default function OrderConfirmationPage() {
     );
   }
 
-  const pickupDate = new Date(order.pickupDate).toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  });
+  const pickupDate = order.pickupDate
+    ? new Date(order.pickupDate).toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+      })
+    : "";
 
   return (
     <div className="min-h-screen bg-brand-cream py-8">
@@ -175,55 +191,68 @@ export default function OrderConfirmationPage() {
         </div>
 
         <div className="space-y-4">
-          {/* Pickup details */}
+          {/* Fulfillment details */}
           <div className="rounded-2xl bg-white border border-brand-cream-dark p-5 shadow-sm space-y-4">
             <h2 className="font-serif text-lg font-semibold flex items-center gap-2">
               <Store className="h-5 w-5 text-brand-red" />
-              {t("pickup_details")}
+              {order.fulfillmentType === "pickup" ? t("pickup_details") : (isJa ? "配送先情報" : "Delivery Details")}
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="rounded-xl bg-brand-cream p-3 space-y-1">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span className="font-sans text-xs font-medium">{isJa ? "受取日" : "Pickup Date"}</span>
+            {order.fulfillmentType === "pickup" ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="rounded-xl bg-brand-cream p-3 space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span className="font-sans text-xs font-medium">{isJa ? "受取日" : "Pickup Date"}</span>
+                    </div>
+                    <p className="font-sans text-sm font-semibold text-foreground">{pickupDate}</p>
+                  </div>
+                  <div className="rounded-xl bg-brand-cream p-3 space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span className="font-sans text-xs font-medium">{isJa ? "受取時間" : "Pickup Time"}</span>
+                    </div>
+                    <p className="font-sans text-sm font-semibold text-foreground">
+                      {TIME_SLOT_LABELS[order.pickupSlot] ?? order.pickupSlot}
+                    </p>
+                  </div>
                 </div>
-                <p className="font-sans text-sm font-semibold text-foreground">{pickupDate}</p>
-              </div>
-              <div className="rounded-xl bg-brand-cream p-3 space-y-1">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span className="font-sans text-xs font-medium">{isJa ? "受取時間" : "Pickup Time"}</span>
+
+                <div className="rounded-xl bg-brand-cream p-3">
+                  <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                    <Store className="h-4 w-4" />
+                    <span className="font-sans text-xs font-medium">{isJa ? "店舗" : "Store"}</span>
+                  </div>
+                  <p className="font-sans text-sm font-semibold text-foreground">
+                    {isJa ? "赤松 Health & Lifestyle 本店" : "Akamatsu Health & Lifestyle Main Store"}
+                  </p>
+                  <p className="font-sans text-xs text-muted-foreground">
+                    {isJa ? "〒150-0001 東京都渋谷区神宮前1-2-3 赤松ビル 1F" : "1F Akamatsu Building, 1-2-3 Jingumae, Shibuya, Tokyo 150-0001"}
+                  </p>
                 </div>
+                {/* QR code */}
+                <div className="flex flex-col items-center gap-3 pt-2 border-t border-brand-cream-dark">
+                  <p className="font-sans text-xs text-muted-foreground text-center">
+                    {isJa ? "店頭でこのQRコードをご提示ください" : "Show this QR code in-store"}
+                  </p>
+                  <QRCodeMock value={order.orderNumber} />
+                  <p className="font-mono text-sm font-bold text-foreground tracking-widest">
+                    {order.orderNumber}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="rounded-xl bg-brand-cream p-3 space-y-1">
+                <p className="font-sans text-xs font-medium text-muted-foreground">{isJa ? "配送先" : "Delivery address"}</p>
                 <p className="font-sans text-sm font-semibold text-foreground">
-                  {TIME_SLOT_LABELS[order.pickupSlot] ?? order.pickupSlot}
+                  {[order.postalCode, order.prefecture, order.city, order.addressLine1, order.addressLine2].filter(Boolean).join(" ")}
+                </p>
+                <p className="font-sans text-xs text-muted-foreground">
+                  {isJa ? "配送準備ができ次第発送します。" : "We will ship as soon as your order is prepared."}
                 </p>
               </div>
-            </div>
-
-            <div className="rounded-xl bg-brand-cream p-3">
-              <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                <Store className="h-4 w-4" />
-                <span className="font-sans text-xs font-medium">{isJa ? "店舗" : "Store"}</span>
-              </div>
-              <p className="font-sans text-sm font-semibold text-foreground">
-                {isJa ? "赤松 Health & Lifestyle 本店" : "Akamatsu Health & Lifestyle Main Store"}
-              </p>
-              <p className="font-sans text-xs text-muted-foreground">
-                {isJa ? "〒150-0001 東京都渋谷区神宮前1-2-3 赤松ビル 1F" : "1F Akamatsu Building, 1-2-3 Jingumae, Shibuya, Tokyo 150-0001"}
-              </p>
-            </div>
-
-            {/* QR code */}
-            <div className="flex flex-col items-center gap-3 pt-2 border-t border-brand-cream-dark">
-              <p className="font-sans text-xs text-muted-foreground text-center">
-                {isJa ? "店頭でこのQRコードをご提示ください" : "Show this QR code in-store"}
-              </p>
-              <QRCodeMock value={order.orderNumber} />
-              <p className="font-mono text-sm font-bold text-foreground tracking-widest">
-                {order.orderNumber}
-              </p>
-            </div>
+            )}
           </div>
 
           {/* Items ordered */}
@@ -274,7 +303,11 @@ export default function OrderConfirmationPage() {
               </div>
               <div className="flex justify-between font-sans text-sm text-muted-foreground">
                 <span>{isJa ? "送料" : "Shipping"}</span>
-                <span className="text-green-600">{isJa ? "¥0（店舗受取）" : "¥0 (store pickup)"}</span>
+                <span className={order.deliveryFee > 0 ? "text-foreground" : "text-green-600"}>
+                  {order.deliveryFee > 0
+                    ? `${formatPrice(order.deliveryFee)} ${isJa ? "（配送見積）" : "(estimated delivery)"}`
+                    : (isJa ? "¥0（店舗受取）" : "¥0 (store pickup)")}
+                </span>
               </div>
               <div className="flex justify-between font-sans text-xs text-muted-foreground">
                 <span>{isJa ? "消費税（10%）" : "Tax (10%)"}</span>
