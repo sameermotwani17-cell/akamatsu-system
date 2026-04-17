@@ -3,9 +3,11 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
+  const t = useTranslations("admin");
   const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState("");
@@ -48,15 +50,15 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-brand-cream-dark bg-white p-8 shadow-sm">
-        <h1 className="font-serif text-2xl font-bold text-foreground">Admin Login</h1>
+        <h1 className="font-serif text-2xl font-bold text-foreground">{t("title")}</h1>
         <p className="font-sans text-sm text-muted-foreground mt-1">
-          Sign in to access owner dashboard
+          {t("subtitle")}
         </p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
           <div>
             <label htmlFor="admin-email" className="block font-sans text-sm font-medium text-foreground mb-1.5">
-              Email
+              {t("email")}
             </label>
             <input
               id="admin-email"
@@ -72,7 +74,7 @@ export default function AdminLoginPage() {
 
           <div>
             <label htmlFor="admin-password" className="block font-sans text-sm font-medium text-foreground mb-1.5">
-              Password
+              {t("password")}
             </label>
             <input
               id="admin-password"
@@ -97,13 +99,13 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="btn-primary w-full justify-center"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? t("signingIn") : t("signIn")}
           </button>
         </form>
 
         <div className="mt-5 pt-4 border-t border-brand-cream-dark">
           <Link href="/" className="font-sans text-sm text-brand-red hover:underline">
-            Back to storefront
+            {t("backToStorefront")}
           </Link>
         </div>
       </div>

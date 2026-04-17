@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   orderId: string;
@@ -15,6 +16,7 @@ export function OrderStatusForm({
   initialPaymentStatus,
   initialArchived,
 }: Props) {
+  const t = useTranslations("ownerStatus");
   const [orderStatus, setOrderStatus] = useState(initialOrderStatus);
   const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
   const [isArchived, setIsArchived] = useState(initialArchived);
@@ -35,15 +37,15 @@ export function OrderStatusForm({
         body: JSON.stringify(next),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Update failed");
+      if (!res.ok) throw new Error(json.error || t("updateFailed"));
       if (next.orderStatus) setOrderStatus(next.orderStatus);
       if (next.paymentStatus) setPaymentStatus(next.paymentStatus);
       if (typeof json?.order?.archived_at !== "undefined") {
         setIsArchived(Boolean(json.order.archived_at));
       }
-      setMessage("Status updated");
+      setMessage(t("statusUpdated"));
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Update failed";
+      const msg = error instanceof Error ? error.message : t("updateFailed");
       setMessage(msg);
     } finally {
       setSaving(false);
@@ -63,13 +65,13 @@ export function OrderStatusForm({
         body: JSON.stringify({ orderStatus, paymentStatus }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Update failed");
+      if (!res.ok) throw new Error(json.error || t("updateFailed"));
       if (typeof json?.order?.archived_at !== "undefined") {
         setIsArchived(Boolean(json.order.archived_at));
       }
-      setMessage("Status updated");
+      setMessage(t("statusUpdated"));
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Update failed";
+      const msg = error instanceof Error ? error.message : t("updateFailed");
       setMessage(msg);
     } finally {
       setSaving(false);
@@ -78,37 +80,37 @@ export function OrderStatusForm({
 
   return (
     <div className="rounded-xl border border-brand-cream-dark bg-white p-4 space-y-3">
-      <h3 className="font-serif text-lg font-semibold text-foreground">Update Status</h3>
+      <h3 className="font-serif text-lg font-semibold text-foreground">{t("updateStatus")}</h3>
       <p className="font-sans text-xs text-muted-foreground">
-        Archive state: {isArchived ? "Archived" : "Active"}
+        {t("archiveState")}: {isArchived ? t("archived") : t("active")}
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="font-sans text-sm text-foreground">
-          <span className="block mb-1.5">Order Status</span>
+          <span className="block mb-1.5">{t("orderStatus")}</span>
           <select
             value={orderStatus}
             onChange={(e) => setOrderStatus(e.target.value as Props["initialOrderStatus"])}
             className="w-full rounded-lg border border-brand-cream-dark bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-brand-red"
           >
-            <option value="confirmed">confirmed</option>
-            <option value="ready">ready</option>
-            <option value="completed">completed</option>
-            <option value="cancelled">cancelled</option>
+            <option value="confirmed">{t("orderStatusConfirmed")}</option>
+            <option value="ready">{t("orderStatusReady")}</option>
+            <option value="completed">{t("orderStatusCompleted")}</option>
+            <option value="cancelled">{t("orderStatusCancelled")}</option>
           </select>
         </label>
 
         <label className="font-sans text-sm text-foreground">
-          <span className="block mb-1.5">Payment Status</span>
+          <span className="block mb-1.5">{t("paymentStatus")}</span>
           <select
             value={paymentStatus}
             onChange={(e) => setPaymentStatus(e.target.value as Props["initialPaymentStatus"])}
             className="w-full rounded-lg border border-brand-cream-dark bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-brand-red"
           >
-            <option value="pending">pending</option>
-            <option value="paid">paid</option>
-            <option value="failed">failed</option>
-            <option value="refunded">refunded</option>
+            <option value="pending">{t("paymentStatusPending")}</option>
+            <option value="paid">{t("paymentStatusPaid")}</option>
+            <option value="failed">{t("paymentStatusFailed")}</option>
+            <option value="refunded">{t("paymentStatusRefunded")}</option>
           </select>
         </label>
       </div>
@@ -119,7 +121,7 @@ export function OrderStatusForm({
           disabled={saving}
           className="btn-primary"
         >
-          {saving ? "Saving..." : "Save"}
+          {saving ? t("saving") : t("save")}
         </button>
         {message && (
           <p className="font-sans text-sm text-muted-foreground">{message}</p>
@@ -127,28 +129,28 @@ export function OrderStatusForm({
       </div>
 
       <div className="pt-2 border-t border-brand-cream-dark">
-        <p className="font-sans text-sm font-medium text-foreground mb-2">Quick Actions</p>
+        <p className="font-sans text-sm font-medium text-foreground mb-2">{t("quickActions")}</p>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => quickAction({ orderStatus: "ready" })}
             disabled={saving}
             className="btn-secondary"
           >
-            Mark Packed
+            {t("markPacked")}
           </button>
           <button
             onClick={() => quickAction({ orderStatus: "completed" })}
             disabled={saving}
             className="btn-secondary"
           >
-            Mark Delivered
+            {t("markDelivered")}
           </button>
           <button
             onClick={() => quickAction({ paymentStatus: "paid" })}
             disabled={saving}
             className="btn-secondary"
           >
-            Mark Paid
+            {t("markPaid")}
           </button>
           {!isArchived ? (
             <button
@@ -156,7 +158,7 @@ export function OrderStatusForm({
               disabled={saving}
               className="btn-secondary"
             >
-              Archive
+              {t("archive")}
             </button>
           ) : (
             <button
@@ -164,7 +166,7 @@ export function OrderStatusForm({
               disabled={saving}
               className="btn-secondary"
             >
-              Reopen
+              {t("reopen")}
             </button>
           )}
         </div>

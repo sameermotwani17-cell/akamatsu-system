@@ -8,7 +8,7 @@ import {
   ChevronRight, ChevronLeft, User, Store, CreditCard, CheckCircle,
   Shield, Lock, AlertCircle, MapPin, Clock
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice, getBusinessDays } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -121,6 +121,9 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 }
 
 function OrderSummaryPanel({ compact = false }: { compact?: boolean }) {
+  const t = useTranslations();
+  const locale = useLocale();
+  const isJa = locale === "ja";
   const { items, subtotal } = useCartStore();
   const [open, setOpen] = useState(!compact);
   const sub = subtotal();
@@ -135,7 +138,7 @@ function OrderSummaryPanel({ compact = false }: { compact?: boolean }) {
         )}
       >
         <span className="font-serif text-base font-semibold">
-          注文内容 / Order Summary
+          {isJa ? "注文内容" : "Order Summary"}
         </span>
         {compact && (
           <div className="flex items-center gap-2">
@@ -182,21 +185,21 @@ function OrderSummaryPanel({ compact = false }: { compact?: boolean }) {
 
           <div className="border-t border-brand-cream-dark pt-3 space-y-1.5">
             <div className="flex justify-between font-sans text-sm text-muted-foreground">
-              <span>小計</span>
+              <span>{t("cart.subtotal")}</span>
               <span>{formatPrice(sub)}</span>
             </div>
             <div className="flex justify-between font-sans text-sm text-muted-foreground">
-              <span>送料</span>
-              <span className="text-green-600">¥0（店舗受取）</span>
+              <span>{t("cart.shipping")}</span>
+              <span className="text-green-600">{isJa ? "¥0（店舗受取）" : "¥0 (store pickup)"}</span>
             </div>
             <div className="flex justify-between font-sans text-xs text-muted-foreground">
-              <span>消費税</span>
-              <span>内税（10%）</span>
+              <span>{isJa ? "消費税" : "Tax"}</span>
+              <span>{isJa ? "内税（10%）" : "Included (10%)"}</span>
             </div>
           </div>
 
           <div className="border-t-2 border-foreground pt-3 flex justify-between">
-            <span className="font-serif font-bold">合計</span>
+            <span className="font-serif font-bold">{t("cart.total")}</span>
             <span className="font-serif font-bold text-brand-red text-lg">{formatPrice(sub)}</span>
           </div>
         </div>
@@ -217,14 +220,16 @@ function CustomerForm({
   onNext: () => void;
 }) {
   const t = useTranslations("checkout");
+  const locale = useLocale();
+  const isJa = locale === "ja";
   const [errors, setErrors] = useState<Partial<Record<keyof CustomerInfo, string>>>({});
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!data.lastName.trim()) e.lastName = "姓を入力してください";
-    if (!data.firstName.trim()) e.firstName = "名を入力してください";
-    if (!data.email.includes("@")) e.email = "有効なメールアドレスを入力してください";
-    if (data.phone.replace(/\D/g, "").length < 10) e.phone = "有効な電話番号を入力してください";
+    if (!data.lastName.trim()) e.lastName = isJa ? "姓を入力してください" : "Please enter last name";
+    if (!data.firstName.trim()) e.firstName = isJa ? "名を入力してください" : "Please enter first name";
+    if (!data.email.includes("@")) e.email = isJa ? "有効なメールアドレスを入力してください" : "Please enter a valid email";
+    if (data.phone.replace(/\D/g, "").length < 10) e.phone = isJa ? "有効な電話番号を入力してください" : "Please enter a valid phone number";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -238,7 +243,7 @@ function CustomerForm({
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       <div>
         <h2 className="font-serif text-xl font-semibold mb-5">
-          {t("customer_info")} / Customer Information
+          {t("customer_info")}
         </h2>
 
         {/* Name row */}
@@ -252,7 +257,7 @@ function CustomerForm({
               type="text"
               value={data.lastName}
               onChange={(e) => onChange({ lastName: e.target.value })}
-              placeholder="山田"
+              placeholder={isJa ? "山田" : "Yamada"}
               required
               autoComplete="family-name"
               className={cn(
@@ -276,7 +281,7 @@ function CustomerForm({
               type="text"
               value={data.firstName}
               onChange={(e) => onChange({ firstName: e.target.value })}
-              placeholder="花子"
+              placeholder={isJa ? "花子" : "Hanako"}
               required
               autoComplete="given-name"
               className={cn(
@@ -338,7 +343,7 @@ function CustomerForm({
 
         {/* Account option */}
         <div className="rounded-xl bg-brand-cream border border-brand-cream-dark p-4 space-y-2">
-          <p className="font-sans text-sm font-semibold text-foreground">アカウント / Account</p>
+          <p className="font-sans text-sm font-semibold text-foreground">{isJa ? "アカウント" : "Account"}</p>
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="radio"
@@ -349,7 +354,7 @@ function CustomerForm({
             />
             <div>
               <span className="font-sans text-sm font-medium text-foreground">{t("guest_checkout")}</span>
-              <p className="font-sans text-xs text-muted-foreground">アカウントなしで注文できます</p>
+              <p className="font-sans text-xs text-muted-foreground">{isJa ? "アカウントなしで注文できます" : "Checkout without creating an account"}</p>
             </div>
           </label>
           <label className="flex items-start gap-3 cursor-pointer">
@@ -362,13 +367,13 @@ function CustomerForm({
             />
             <div>
               <span className="font-sans text-sm font-medium text-foreground">{t("create_account")}</span>
-              <p className="font-sans text-xs text-muted-foreground">注文履歴の確認・次回以降の手続きが簡単に</p>
+              <p className="font-sans text-xs text-muted-foreground">{isJa ? "注文履歴の確認・次回以降の手続きが簡単に" : "Save history and speed up next checkout"}</p>
             </div>
           </label>
           {!data.isGuest && (
             <div className="pt-2">
               <label htmlFor="password" className="block font-sans text-xs font-medium text-foreground mb-1">
-                パスワード（8文字以上）
+                {isJa ? "パスワード（8文字以上）" : "Password (8+ characters)"}
               </label>
               <input
                 id="password"
@@ -385,7 +390,7 @@ function CustomerForm({
       </div>
 
       <button type="submit" className="btn-primary w-full py-4">
-        次へ — 受取方法
+        {isJa ? "次へ - 受取方法" : "Next - Fulfillment"}
         <ChevronRight className="h-4 w-4" />
       </button>
     </form>
@@ -404,13 +409,15 @@ function PickupForm({
   onBack: () => void;
 }) {
   const t = useTranslations("checkout");
+  const locale = useLocale();
+  const isJa = locale === "ja";
   const [errors, setErrors] = useState<{ date?: string; slot?: string }>({});
   const businessDays = getBusinessDays(14);
 
   const validate = () => {
     const e: typeof errors = {};
-    if (!data.date) e.date = "受取日を選択してください";
-    if (!data.slot) e.slot = "受取時間を選択してください";
+    if (!data.date) e.date = isJa ? "受取日を選択してください" : "Please select a pickup date";
+    if (!data.slot) e.slot = isJa ? "受取時間を選択してください" : "Please select a pickup time";
     setErrors(e);
     return !e.date && !e.slot;
   };
@@ -423,7 +430,7 @@ function PickupForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       <h2 className="font-serif text-xl font-semibold">
-        {t("fulfillment")} / Store Pickup
+        {t("fulfillment")}
       </h2>
 
       {/* Store info card */}
@@ -432,13 +439,13 @@ function PickupForm({
           <MapPin className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
           <div>
             <p className="font-sans text-sm font-semibold text-green-800">
-              赤松 Health & Lifestyle 本店
+              {isJa ? "赤松 Health & Lifestyle 本店" : "Akamatsu Health & Lifestyle Main Store"}
             </p>
             <p className="font-sans text-xs text-green-700 mt-0.5">
-              〒150-0001 東京都渋谷区神宮前1-2-3 赤松ビル 1F
+              {isJa ? "〒150-0001 東京都渋谷区神宮前1-2-3 赤松ビル 1F" : "1F Akamatsu Building, 1-2-3 Jingumae, Shibuya, Tokyo 150-0001"}
             </p>
             <p className="font-sans text-xs text-green-700">
-              営業時間: 10:00〜19:00（日曜・祝日定休）
+              {isJa ? "営業時間: 10:00〜19:00（日曜・祝日定休）" : "Hours: 10:00-19:00 (Closed Sun & Holidays)"}
             </p>
           </div>
         </div>
@@ -447,14 +454,14 @@ function PickupForm({
         <div className="mt-2 rounded-lg overflow-hidden border border-green-200 aspect-video bg-green-100 flex items-center justify-center">
           <div className="text-center text-green-700/70">
             <MapPin className="h-8 w-8 mx-auto mb-1" />
-            <p className="font-sans text-xs">Googleマップ / Google Maps</p>
+            <p className="font-sans text-xs">{isJa ? "Googleマップ" : "Google Maps"}</p>
             <a
               href="https://maps.google.com/?q=渋谷区神宮前1-2-3"
               target="_blank"
               rel="noopener noreferrer"
               className="font-sans text-xs text-green-600 underline hover:text-green-800"
             >
-              地図を開く / Open Map →
+              {isJa ? "地図を開く" : "Open map"} →
             </a>
           </div>
         </div>
@@ -462,7 +469,7 @@ function PickupForm({
         <div className="flex items-center gap-2 rounded-lg bg-white/70 px-3 py-2">
           <Store className="h-4 w-4 text-green-600" />
           <span className="font-sans text-xs font-semibold text-green-800">
-            {t("no_delivery_fee")} — 送料¥0
+            {t("no_delivery_fee")} - {isJa ? "送料¥0" : "Shipping ¥0"}
           </span>
         </div>
       </div>
@@ -481,7 +488,7 @@ function PickupForm({
             errors.date ? "border-red-400" : "border-brand-cream-dark"
           )}
         >
-          <option value="">受取日を選択してください / Select a date</option>
+          <option value="">{isJa ? "受取日を選択してください" : "Select a date"}</option>
           {businessDays.map((d) => {
             const label = d.toLocaleDateString("ja-JP", {
               month: "long",
@@ -552,7 +559,7 @@ function PickupForm({
           {t("back")}
         </button>
         <button type="submit" className="btn-primary flex-1 py-3.5">
-          次へ — お支払い
+          {isJa ? "次へ - お支払い" : "Next - Payment"}
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -574,14 +581,16 @@ function PaymentForm({
   isProcessing: boolean;
 }) {
   const t = useTranslations("checkout");
+  const locale = useLocale();
+  const isJa = locale === "ja";
   const [errors, setErrors] = useState<Partial<Record<keyof PaymentInfo, string>>>({});
 
   const validate = () => {
     const e: typeof errors = {};
-    if (data.cardNumber.replace(/\s/g, "").length < 16) e.cardNumber = "有効なカード番号を入力してください";
-    if (data.expiry.length < 5) e.expiry = "有効期限を入力してください";
-    if (data.cvv.length < 3) e.cvv = "CVVを入力してください";
-    if (!data.cardName.trim()) e.cardName = "カード名義を入力してください";
+    if (data.cardNumber.replace(/\s/g, "").length < 16) e.cardNumber = isJa ? "有効なカード番号を入力してください" : "Please enter a valid card number";
+    if (data.expiry.length < 5) e.expiry = isJa ? "有効期限を入力してください" : "Please enter expiry date";
+    if (data.cvv.length < 3) e.cvv = isJa ? "CVVを入力してください" : "Please enter CVV";
+    if (!data.cardName.trim()) e.cardName = isJa ? "カード名義を入力してください" : "Please enter cardholder name";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -595,7 +604,7 @@ function PaymentForm({
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       <div className="flex items-center justify-between">
         <h2 className="font-serif text-xl font-semibold">
-          {t("payment")} / Payment
+          {t("payment")}
         </h2>
         <div className="flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1">
           <Lock className="h-3.5 w-3.5 text-green-600" />
@@ -611,9 +620,9 @@ function PaymentForm({
           <span className="font-serif text-sm font-bold text-brand-red">AirPay</span>
         </div>
         <div>
-          <p className="font-sans text-xs font-semibold text-foreground">AirPay決済 / AirPay Payment</p>
+          <p className="font-sans text-xs font-semibold text-foreground">{isJa ? "AirPay決済" : "AirPay Payment"}</p>
           <p className="font-sans text-[10px] text-muted-foreground">
-            カード情報はトークン化されます。サーバーには保存されません。
+            {isJa ? "カード情報はトークン化されます。サーバーには保存されません。" : "Card details are tokenized and never stored on our server."}
           </p>
         </div>
         <Shield className="h-5 w-5 text-brand-stone ml-auto shrink-0" />
@@ -706,7 +715,7 @@ function PaymentForm({
       {/* Card name */}
       <div>
         <label htmlFor="cardName" className="block font-sans text-sm font-semibold text-foreground mb-1.5">
-          カード名義 / Name on Card <span className="text-brand-red" aria-hidden="true">*</span>
+          {isJa ? "カード名義" : "Name on Card"} <span className="text-brand-red" aria-hidden="true">*</span>
         </label>
         <input
           id="cardName"
@@ -746,7 +755,7 @@ function PaymentForm({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              処理中...
+              {isJa ? "処理中..." : "Processing..."}
             </>
           ) : (
             <>
@@ -758,11 +767,11 @@ function PaymentForm({
       </div>
 
       <p className="font-sans text-[10px] text-muted-foreground text-center">
-        注文を確定することで、
-        <Link href="/legal/privacy" className="underline hover:text-brand-red">プライバシーポリシー</Link>
-        および
-        <Link href="/legal/tokusho" className="underline hover:text-brand-red">特定商取引法に基づく表記</Link>
-        に同意したものとみなされます。
+        {isJa ? "注文を確定することで、" : "By placing your order, you agree to our "}
+        <Link href="/legal/privacy" className="underline hover:text-brand-red">{isJa ? "プライバシーポリシー" : "Privacy Policy"}</Link>
+        {isJa ? "および" : " and "}
+        <Link href="/legal/tokusho" className="underline hover:text-brand-red">{isJa ? "特定商取引法に基づく表記" : "Commercial Transactions Notice"}</Link>
+        {isJa ? "に同意したものとみなされます。" : "."}
       </p>
     </form>
   );
@@ -772,6 +781,8 @@ function PaymentForm({
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
+  const locale = useLocale();
+  const isJa = locale === "ja";
   const router = useRouter();
   const { items, subtotal, clearCart } = useCartStore();
   const [step, setStep] = useState(1);
@@ -835,13 +846,13 @@ export default function CheckoutPage() {
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "Failed to place order");
+        throw new Error(result.error || (isJa ? "注文に失敗しました" : "Failed to place order"));
       }
 
       clearCart();
       router.push(`/order-confirmation?orderId=${encodeURIComponent(result.id)}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "注文の作成に失敗しました。";
+      const message = error instanceof Error ? error.message : isJa ? "注文の作成に失敗しました。" : "Failed to create order.";
       setSubmitError(message);
       setIsProcessing(false);
     }
@@ -852,8 +863,8 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-brand-cream flex items-center justify-center">
         <div className="text-center space-y-4">
-          <p className="font-sans text-muted-foreground">カートが空です / Cart is empty</p>
-          <Link href="/shop" className="btn-primary inline-flex">ショップへ戻る</Link>
+          <p className="font-sans text-muted-foreground">{isJa ? "カートが空です" : "Cart is empty"}</p>
+          <Link href="/shop" className="btn-primary inline-flex">{isJa ? "ショップへ戻る" : "Back to shop"}</Link>
         </div>
       </div>
     );
@@ -926,7 +937,17 @@ export default function CheckoutPage() {
               ].map((item) => (
                 <div key={item.text} className="flex items-center gap-2.5">
                   <span className="text-base">{item.icon}</span>
-                  <span className="font-sans text-xs text-muted-foreground">{item.text}</span>
+                  <span className="font-sans text-xs text-muted-foreground">
+                    {isJa
+                      ? item.text
+                      : item.icon === "🔒"
+                        ? "Secure connection with SSL"
+                        : item.icon === "🏪"
+                          ? "Store pickup with ¥0 shipping"
+                          : item.icon === "🌿"
+                            ? "Certified organic and gluten-free products"
+                            : "PCI DSS compliant payment processing"}
+                  </span>
                 </div>
               ))}
             </div>

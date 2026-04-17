@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/utils";
 
 export default async function OwnerPaymentsPage() {
+  const t = await getTranslations("owner");
   const supabase = createAdminClient() as any;
 
   const { data, error } = await supabase
@@ -16,9 +18,9 @@ export default async function OwnerPaymentsPage() {
     <div className="min-h-screen bg-brand-cream py-8">
       <div className="container-padded max-w-6xl">
         <div className="mb-6">
-          <h1 className="font-serif text-3xl font-bold text-foreground">Pending Payments</h1>
+          <h1 className="font-serif text-3xl font-bold text-foreground">{t("pendingPayments")}</h1>
           <p className="font-sans text-sm text-muted-foreground mt-1">
-            Skeleton payment operations queue for upcoming provider integration.
+            {t("paymentsSubtitle")}
           </p>
         </div>
 
@@ -33,10 +35,10 @@ export default async function OwnerPaymentsPage() {
             <table className="w-full text-left">
               <thead className="bg-brand-cream border-b border-brand-cream-dark">
                 <tr>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Order</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Customer</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("order")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("customer")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("total")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -59,7 +61,7 @@ export default async function OwnerPaymentsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 font-sans text-xs text-blue-700">
-                        {item.payment_status}
+                        {t(`paymentStatus_${item.payment_status}`)}
                       </span>
                     </td>
                   </tr>
@@ -67,7 +69,7 @@ export default async function OwnerPaymentsPage() {
                 {(data ?? []).length === 0 && (
                   <tr>
                     <td colSpan={4} className="px-4 py-10 text-center">
-                      <p className="font-sans text-sm text-muted-foreground">No pending payments.</p>
+                      <p className="font-sans text-sm text-muted-foreground">{t("noPendingPayments")}</p>
                     </td>
                   </tr>
                 )}

@@ -41,7 +41,7 @@ export function Header() {
             <Link
               href="/"
               className="flex items-center gap-2 shrink-0"
-              aria-label="赤松 Health & Lifestyle — Home"
+              aria-label={t("nav.home")}
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-red">
                 <Leaf className="h-5 w-5 text-white" />
@@ -71,7 +71,7 @@ export function Header() {
                 href="/admin"
                 className="font-sans text-sm text-foreground/70 hover:text-brand-red transition-colors"
               >
-                Admin
+                {t("nav.admin")}
               </Link>
             </nav>
 
@@ -103,7 +103,7 @@ export function Header() {
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="lg:hidden p-2 rounded-lg hover:bg-brand-cream transition-colors"
-                aria-label="Toggle menu"
+                aria-label={t("nav.toggle_menu")}
               >
                 {mobileOpen ? (
                   <X className="h-5 w-5" />
@@ -127,10 +127,10 @@ export function Header() {
                 <input
                   name="q"
                   type="search"
-                  placeholder="商品を検索 / Search products..."
+                  placeholder={t("nav.search_placeholder")}
                   autoFocus
                   className="w-full rounded-lg border border-brand-cream-dark bg-brand-cream px-4 py-2.5 text-sm font-sans outline-none focus:ring-2 focus:ring-brand-red transition-shadow"
-                  aria-label="Search products"
+                  aria-label={t("nav.search_products")}
                 />
               </form>
             </div>
@@ -156,7 +156,7 @@ export function Header() {
                 onClick={() => setMobileOpen(false)}
                 className="block rounded-lg px-3 py-2.5 font-sans text-sm text-foreground/80 hover:bg-brand-cream hover:text-brand-red transition-colors"
               >
-                Admin
+                {t("nav.admin")}
               </Link>
             </nav>
           </div>

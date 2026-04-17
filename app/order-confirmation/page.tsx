@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle, Store, Calendar, Clock, ShoppingBag, Mail } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { formatPrice } from "@/lib/utils";
 type ApiOrderItem = {
   id: string;
@@ -67,6 +67,8 @@ function QRCodeMock({ value }: { value: string }) {
 
 export default function OrderConfirmationPage() {
   const t = useTranslations("confirmation");
+  const locale = useLocale();
+  const isJa = locale === "ja";
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,7 +85,7 @@ export default function OrderConfirmationPage() {
       try {
         const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`);
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Failed to load order");
+        if (!res.ok) throw new Error(json.error || (isJa ? "注文の読み込みに失敗しました" : "Failed to load order"));
 
         if (!mounted) return;
         setOrder({
@@ -113,7 +115,7 @@ export default function OrderConfirmationPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4">
-        <p className="font-sans text-muted-foreground">Loading order...</p>
+        <p className="font-sans text-muted-foreground">{isJa ? "注文を読み込み中..." : "Loading order..."}</p>
       </div>
     );
   }
@@ -124,10 +126,10 @@ export default function OrderConfirmationPage() {
         <div className="text-center space-y-4">
           <div className="text-5xl">📦</div>
           <h1 className="font-serif text-xl font-semibold">
-            注文が見つかりません / No order found
+            {isJa ? "注文が見つかりません" : "No order found"}
           </h1>
           <Link href="/shop" className="btn-primary inline-flex">
-            ショッピングを続ける
+            {t("back_to_shop")}
           </Link>
         </div>
       </div>
@@ -184,14 +186,14 @@ export default function OrderConfirmationPage() {
               <div className="rounded-xl bg-brand-cream p-3 space-y-1">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  <span className="font-sans text-xs font-medium">受取日 / Pickup Date</span>
+                  <span className="font-sans text-xs font-medium">{isJa ? "受取日" : "Pickup Date"}</span>
                 </div>
                 <p className="font-sans text-sm font-semibold text-foreground">{pickupDate}</p>
               </div>
               <div className="rounded-xl bg-brand-cream p-3 space-y-1">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  <span className="font-sans text-xs font-medium">受取時間 / Pickup Time</span>
+                  <span className="font-sans text-xs font-medium">{isJa ? "受取時間" : "Pickup Time"}</span>
                 </div>
                 <p className="font-sans text-sm font-semibold text-foreground">
                   {TIME_SLOT_LABELS[order.pickupSlot] ?? order.pickupSlot}
@@ -202,20 +204,20 @@ export default function OrderConfirmationPage() {
             <div className="rounded-xl bg-brand-cream p-3">
               <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
                 <Store className="h-4 w-4" />
-                <span className="font-sans text-xs font-medium">店舗 / Store</span>
+                <span className="font-sans text-xs font-medium">{isJa ? "店舗" : "Store"}</span>
               </div>
               <p className="font-sans text-sm font-semibold text-foreground">
-                赤松 Health & Lifestyle 本店
+                {isJa ? "赤松 Health & Lifestyle 本店" : "Akamatsu Health & Lifestyle Main Store"}
               </p>
               <p className="font-sans text-xs text-muted-foreground">
-                〒150-0001 東京都渋谷区神宮前1-2-3 赤松ビル 1F
+                {isJa ? "〒150-0001 東京都渋谷区神宮前1-2-3 赤松ビル 1F" : "1F Akamatsu Building, 1-2-3 Jingumae, Shibuya, Tokyo 150-0001"}
               </p>
             </div>
 
             {/* QR code */}
             <div className="flex flex-col items-center gap-3 pt-2 border-t border-brand-cream-dark">
               <p className="font-sans text-xs text-muted-foreground text-center">
-                店頭でこのQRコードをご提示ください / Show this QR code in-store
+                {isJa ? "店頭でこのQRコードをご提示ください" : "Show this QR code in-store"}
               </p>
               <QRCodeMock value={order.orderNumber} />
               <p className="font-mono text-sm font-bold text-foreground tracking-widest">
@@ -267,22 +269,22 @@ export default function OrderConfirmationPage() {
             {/* Totals */}
             <div className="border-t border-brand-cream-dark pt-3 space-y-1.5">
               <div className="flex justify-between font-sans text-sm text-muted-foreground">
-                <span>小計</span>
+                <span>{isJa ? "小計" : "Subtotal"}</span>
                 <span>{formatPrice(order.subtotal)}</span>
               </div>
               <div className="flex justify-between font-sans text-sm text-muted-foreground">
-                <span>送料</span>
-                <span className="text-green-600">¥0（店舗受取）</span>
+                <span>{isJa ? "送料" : "Shipping"}</span>
+                <span className="text-green-600">{isJa ? "¥0（店舗受取）" : "¥0 (store pickup)"}</span>
               </div>
               <div className="flex justify-between font-sans text-xs text-muted-foreground">
-                <span>消費税（10%）</span>
-                <span>内税</span>
+                <span>{isJa ? "消費税（10%）" : "Tax (10%)"}</span>
+                <span>{isJa ? "内税" : "Included"}</span>
               </div>
               <div className="flex justify-between font-serif text-base font-bold pt-2 border-t border-brand-cream-dark">
-                <span>お支払い合計</span>
+                <span>{isJa ? "お支払い合計" : "Total Paid"}</span>
                 <span className="text-brand-red">{formatPrice(order.total)}</span>
               </div>
-              <p className="font-sans text-xs text-muted-foreground text-right">支払い済み ✓</p>
+              <p className="font-sans text-xs text-muted-foreground text-right">{isJa ? "支払い済み ✓" : "Paid ✓"}</p>
             </div>
           </div>
 
@@ -294,8 +296,15 @@ export default function OrderConfirmationPage() {
                 {t("confirmation_sent")}
               </p>
               <p className="font-sans text-xs text-blue-700 mt-0.5">
-                確認メールを <strong>{order.email}</strong> に送信しました。
-                届かない場合は迷惑メールフォルダをご確認ください。
+                {isJa ? (
+                  <>
+                    確認メールを <strong>{order.email}</strong> に送信しました。届かない場合は迷惑メールフォルダをご確認ください。
+                  </>
+                ) : (
+                  <>
+                    We sent a confirmation email to <strong>{order.email}</strong>. If you do not see it, please check your spam folder.
+                  </>
+                )}
               </p>
             </div>
           </div>

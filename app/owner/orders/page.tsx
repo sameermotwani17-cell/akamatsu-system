@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/utils";
 
 export default async function OwnerOrdersPage() {
+  const t = await getTranslations("owner");
   const supabase = createAdminClient() as any;
 
   const { data: activeOrders, error } = await supabase
@@ -29,13 +31,13 @@ export default async function OwnerOrdersPage() {
     <div className="min-h-screen bg-brand-cream py-8">
       <div className="container-padded max-w-6xl">
         <div className="mb-6">
-          <h1 className="font-serif text-3xl font-bold text-foreground">Owner Orders</h1>
+          <h1 className="font-serif text-3xl font-bold text-foreground">{t("ordersTitle")}</h1>
           <p className="font-sans text-sm text-muted-foreground mt-1">
-            Incoming and historical order operations
+            {t("ordersSubtitle")}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <Link href="/owner/payments" className="btn-secondary">
-              Pending Payments ({pendingPaymentsCount ?? 0})
+              {t("pendingPayments")} ({pendingPaymentsCount ?? 0})
             </Link>
           </div>
         </div>
@@ -53,18 +55,18 @@ export default async function OwnerOrdersPage() {
 
         <div className="rounded-2xl border border-brand-cream-dark bg-white overflow-hidden shadow-sm mb-6">
           <div className="px-4 py-3 border-b border-brand-cream-dark bg-brand-cream">
-            <h2 className="font-serif text-lg font-semibold text-foreground">Active Orders</h2>
+            <h2 className="font-serif text-lg font-semibold text-foreground">{t("activeOrders")}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-brand-cream border-b border-brand-cream-dark">
                 <tr>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Order</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Customer</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pickup</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Payment</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("order")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("customer")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("pickup")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("total")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("payment")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -91,12 +93,12 @@ export default async function OwnerOrdersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 font-sans text-xs text-blue-700">
-                        {order.payment_status}
+                        {t(`paymentStatus_${order.payment_status}`)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 font-sans text-xs text-amber-700">
-                        {order.order_status}
+                        {t(`orderStatus_${order.order_status}`)}
                       </span>
                     </td>
                   </tr>
@@ -104,7 +106,7 @@ export default async function OwnerOrdersPage() {
                 {(activeOrders ?? []).length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-10 text-center">
-                      <p className="font-sans text-sm text-muted-foreground">No active orders.</p>
+                      <p className="font-sans text-sm text-muted-foreground">{t("noActiveOrders")}</p>
                     </td>
                   </tr>
                 )}
@@ -115,18 +117,18 @@ export default async function OwnerOrdersPage() {
 
         <div className="rounded-2xl border border-brand-cream-dark bg-white overflow-hidden shadow-sm">
           <div className="px-4 py-3 border-b border-brand-cream-dark bg-brand-cream">
-            <h2 className="font-serif text-lg font-semibold text-foreground">Past Orders</h2>
+            <h2 className="font-serif text-lg font-semibold text-foreground">{t("pastOrders")}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-brand-cream border-b border-brand-cream-dark">
                 <tr>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Order</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Customer</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pickup</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Payment</th>
-                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("order")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("customer")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("pickup")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("total")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("payment")}</th>
+                  <th className="px-4 py-3 font-sans text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -153,12 +155,12 @@ export default async function OwnerOrdersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 font-sans text-xs text-blue-700">
-                        {order.payment_status}
+                        {t(`paymentStatus_${order.payment_status}`)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 font-sans text-xs text-amber-700">
-                        {order.order_status}
+                        {t(`orderStatus_${order.order_status}`)}
                       </span>
                     </td>
                   </tr>
@@ -166,7 +168,7 @@ export default async function OwnerOrdersPage() {
                 {(pastOrders ?? []).length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-10 text-center">
-                      <p className="font-sans text-sm text-muted-foreground">No past orders.</p>
+                      <p className="font-sans text-sm text-muted-foreground">{t("noPastOrders")}</p>
                     </td>
                   </tr>
                 )}
