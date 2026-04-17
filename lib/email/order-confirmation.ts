@@ -55,6 +55,8 @@ function buildEmailText(input: SendOrderConfirmationInput) {
 }
 
 function buildEmailHtml(input: SendOrderConfirmationInput) {
+  const qrValue = encodeURIComponent(input.orderNumber);
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${qrValue}`;
   const itemRows = input.items
     .map(
       (item) =>
@@ -71,6 +73,11 @@ function buildEmailHtml(input: SendOrderConfirmationInput) {
       <p style="margin:0;"><strong>注文番号:</strong> ${escapeHtml(input.orderNumber)}</p>
       <p style="margin:0;"><strong>受取日:</strong> ${escapeHtml(input.pickupDate)}</p>
       <p style="margin:0;"><strong>受取時間:</strong> ${escapeHtml(input.pickupSlot)}</p>
+    </div>
+    <div style="margin:0 0 16px; border:1px solid #EDE8DF; border-radius:12px; padding:12px; text-align:center; background:#FFFFFF;">
+      <p style="margin:0 0 8px; color:#7A6A58; font-size:13px;">店頭でこのQRコードをご提示ください / Show this QR code in-store</p>
+      <img src="${qrImageUrl}" width="170" height="170" alt="Order QR ${escapeHtml(input.orderNumber)}" style="display:block; margin:0 auto 8px; border-radius:10px; border:1px solid #EDE8DF;" />
+      <p style="margin:0; font-family: 'Courier New', monospace; font-weight:700; letter-spacing:1px;">${escapeHtml(input.orderNumber)}</p>
     </div>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:12px;">
       <tbody>${itemRows}</tbody>

@@ -34,7 +34,12 @@ function badRequest(message: string) {
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as Partial<CreateOrderBody>;
+    const body = (await req.json()) as Partial<CreateOrderBody> & Record<string, unknown>;
+
+    // Safety guard: raw card data must never hit our server until tokenized provider integration is added.
+    if ("payment" in body || "cardNumber" in body || "cvv" in body || "expiry" in body) {
+      return badRequest("Raw card data must not be sent to this API");
+    }
 
     if (!body.idempotencyKey || body.idempotencyKey.length < 8) {
       return badRequest("Missing idempotencyKey");
