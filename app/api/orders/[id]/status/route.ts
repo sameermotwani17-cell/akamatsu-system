@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 type Params = {
   params: Promise<{ id: string }>;
 };
 
 export async function PATCH(req: Request, { params }: Params) {
+  const authClient = await createClient();
+  const { data: authData } = await authClient.auth.getUser();
+  if (!authData.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const payload = (await req.json()) as {
     orderStatus?: "confirmed" | "ready" | "completed" | "cancelled";

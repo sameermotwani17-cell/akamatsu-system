@@ -67,6 +67,12 @@ export function Header() {
                   {t(`categories.${cat.key}`)}
                 </Link>
               ))}
+              <Link
+                href="/admin"
+                className="font-sans text-sm text-foreground/70 hover:text-brand-red transition-colors"
+              >
+                Admin
+              </Link>
             </nav>
 
             {/* Right actions */}
@@ -145,6 +151,13 @@ export function Header() {
                   {t(`categories.${cat.key}`)}
                 </Link>
               ))}
+              <Link
+                href="/admin"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-lg px-3 py-2.5 font-sans text-sm text-foreground/80 hover:bg-brand-cream hover:text-brand-red transition-colors"
+              >
+                Admin
+              </Link>
             </nav>
           </div>
         )}
