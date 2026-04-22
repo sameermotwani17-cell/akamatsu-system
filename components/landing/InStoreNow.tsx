@@ -18,9 +18,9 @@ export function InStoreNow() {
         {/* Header */}
         <div className="flex items-end justify-between mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-brand-red/10 border border-brand-red/20 px-3 py-1 mb-3">
-              <Store className="h-3.5 w-3.5 text-brand-red" />
-              <span className="font-sans text-xs font-semibold text-brand-red">
+            <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 mb-3" style={{ background: "#FDF5EC", borderColor: "#E8D0A8" }}>
+              <Store className="h-3.5 w-3.5" style={{ color: "#7A5235" }} />
+              <span className="font-sans text-xs font-semibold" style={{ color: "#5C3D20" }}>
                 {t("landing.in_store_badge")}
               </span>
             </div>
@@ -33,7 +33,9 @@ export function InStoreNow() {
           </div>
           <Link
             href="/shop"
-            className="hidden sm:flex items-center gap-1.5 font-sans text-sm font-medium text-brand-red hover:text-brand-red-dark transition-colors group"
+            className="hidden sm:flex items-center gap-1.5 font-sans text-sm font-medium transition-colors group" style={{ color: "#7A5235" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#5C3D20")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#7A5235")}
           >
             {t("landing.view_all")}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -73,7 +75,7 @@ export function InStoreNow() {
                   />
                   <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                     {product.is_bestseller && (
-                      <span className="rounded-md bg-brand-red px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                      <span className="rounded-md px-2.5 py-1 text-[11px] font-bold text-white shadow-sm" style={{ background: "#7A5235" }}>
                         {t("product.bestseller")}
                       </span>
                     )}
@@ -83,7 +85,7 @@ export function InStoreNow() {
                       </span>
                     )}
                     {isOnSale && (
-                      <span className="rounded-md bg-green-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                      <span className="rounded-md px-2.5 py-1 text-[11px] font-bold text-white shadow-sm" style={{ background: "#2D5A27" }}>
                         {t("product.on_sale")}
                       </span>
                     )}
@@ -101,7 +103,7 @@ export function InStoreNow() {
                     })}
                   </div>
 
-                  <h3 className="font-serif text-base font-semibold text-foreground group-hover:text-brand-red transition-colors leading-snug">
+                  <h3 className="font-serif text-base font-semibold text-foreground transition-colors leading-snug">
                     {productName}
                   </h3>
                   <p className="font-sans text-xs text-muted-foreground line-clamp-2 leading-relaxed">
@@ -110,7 +112,7 @@ export function InStoreNow() {
 
                   <div className="flex items-center justify-between pt-1">
                     <div>
-                      <span className="font-serif text-lg font-bold text-brand-red">
+                      <span className="font-serif text-lg font-bold" style={{ color: "#7A5235" }}>
                         ¥{displayPrice.toLocaleString("ja-JP")}
                       </span>
                       {isOnSale && (
@@ -119,7 +121,7 @@ export function InStoreNow() {
                         </span>
                       )}
                     </div>
-                    <span className="font-sans text-xs text-brand-red font-medium group-hover:gap-2 flex items-center gap-1 transition-all">
+                    <span className="font-sans text-xs font-medium group-hover:gap-2 flex items-center gap-1 transition-all" style={{ color: "#7A5235" }}>
                       {t("product.details")} <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>

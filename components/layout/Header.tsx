@@ -25,16 +25,16 @@ export function Header() {
 
   return (
     <>
-      {/* Trust bar */}
-      <div className="bg-brand-red text-white text-xs py-1.5 text-center font-sans tracking-wide">
+      {/* Trust bar — wood brown */}
+      <div className="text-white text-xs py-1.5 text-center font-sans tracking-wide" style={{ background: "#5C3D20" }}>
         <span className="hidden sm:inline">
-          🌿 {t("trust.organic")} · {t("trust.gluten_free")} ·{" "}
+          🏡 {t("trust.organic")} · {t("trust.gluten_free")} ·{" "}
           {t("trust.free_pickup")} · {t("trust.reviews_summary")}
         </span>
-        <span className="sm:hidden">🌿 {t("trust.organic")} · {t("trust.free_pickup")}</span>
+        <span className="sm:hidden">🏡 {t("trust.organic")} · {t("trust.free_pickup")}</span>
       </div>
 
-      <header className="sticky top-0 z-50 bg-white border-b border-brand-cream-dark shadow-sm">
+      <header className="sticky top-0 z-50 border-b border-brand-cream-dark shadow-sm" style={{ background: "#FFFDF9" }}>
         <div className="container-padded">
           <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
@@ -43,15 +43,21 @@ export function Header() {
               className="flex items-center gap-2 shrink-0"
               aria-label={t("nav.home")}
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-red">
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full"
+                style={{ background: "#7A5235" }}
+              >
                 <Leaf className="h-5 w-5 text-white" />
               </div>
               <div className="hidden sm:block">
-                <span className="font-serif text-xl font-semibold text-brand-red leading-none">
+                <span
+                  className="font-serif text-xl font-semibold leading-none"
+                  style={{ color: "#5C3D20" }}
+                >
                   赤松
                 </span>
                 <span className="block font-sans text-[10px] text-brand-stone uppercase tracking-widest leading-none mt-0.5">
-                  Health & Lifestyle
+                  自然食品・調味料
                 </span>
               </div>
             </Link>
@@ -62,14 +68,19 @@ export function Header() {
                 <Link
                   key={cat.key}
                   href={cat.href}
-                  className="font-sans text-sm text-foreground/70 hover:text-brand-red transition-colors"
+                  className="font-sans text-sm text-foreground/70 transition-colors hover:text-brand-wood"
+                  style={{ ["--tw-hover-text-opacity" as string]: "1" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#7A5235")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "")}
                 >
                   {t(`categories.${cat.key}`)}
                 </Link>
               ))}
               <Link
                 href="/admin"
-                className="font-sans text-sm text-foreground/70 hover:text-brand-red transition-colors"
+                className="font-sans text-sm text-foreground/70 transition-colors"
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#7A5235")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "")}
               >
                 {t("nav.admin")}
               </Link>
@@ -94,7 +105,10 @@ export function Header() {
               >
                 <ShoppingCart className="h-5 w-5 text-foreground/70" />
                 {count > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white">
+                  <span
+                    className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                    style={{ background: "#7A5235" }}
+                  >
                     {count > 9 ? "9+" : count}
                   </span>
                 )}
@@ -129,7 +143,10 @@ export function Header() {
                   type="search"
                   placeholder={t("nav.search_placeholder")}
                   autoFocus
-                  className="w-full rounded-lg border border-brand-cream-dark bg-brand-cream px-4 py-2.5 text-sm font-sans outline-none focus:ring-2 focus:ring-brand-red transition-shadow"
+                  className="w-full rounded-lg border border-brand-cream-dark bg-brand-cream px-4 py-2.5 text-sm font-sans outline-none transition-shadow"
+                  style={{ ["--tw-ring-color" as string]: "#7A5235" }}
+                  onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 2px #7A5235")}
+                  onBlur={(e) => (e.currentTarget.style.boxShadow = "")}
                   aria-label={t("nav.search_products")}
                 />
               </form>
@@ -139,14 +156,16 @@ export function Header() {
 
         {/* Mobile nav */}
         {mobileOpen && (
-          <div className="lg:hidden border-t border-brand-cream-dark bg-white">
+          <div className="lg:hidden border-t border-brand-cream-dark" style={{ background: "#FFFDF9" }}>
             <nav className="container-padded py-4 space-y-1" aria-label="Mobile navigation">
               {categories.map((cat) => (
                 <Link
                   key={cat.key}
                   href={cat.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-3 py-2.5 font-sans text-sm text-foreground/80 hover:bg-brand-cream hover:text-brand-red transition-colors"
+                  className="block rounded-lg px-3 py-2.5 font-sans text-sm text-foreground/80 hover:bg-brand-cream transition-colors"
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#7A5235")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "")}
                 >
                   {t(`categories.${cat.key}`)}
                 </Link>
@@ -154,7 +173,7 @@ export function Header() {
               <Link
                 href="/admin"
                 onClick={() => setMobileOpen(false)}
-                className="block rounded-lg px-3 py-2.5 font-sans text-sm text-foreground/80 hover:bg-brand-cream hover:text-brand-red transition-colors"
+                className="block rounded-lg px-3 py-2.5 font-sans text-sm text-foreground/80 hover:bg-brand-cream transition-colors"
               >
                 {t("nav.admin")}
               </Link>

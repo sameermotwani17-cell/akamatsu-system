@@ -1,37 +1,47 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Heart, Sparkles, Pill, Flower2, Sun } from "lucide-react";
+import { Leaf, Droplets, Flame, Wind, Coffee } from "lucide-react";
 
 const CATEGORIES = [
   {
     key: "health",
     descKey: "health_desc",
-    icon: Heart,
-    color: "bg-red-50 text-brand-red group-hover:bg-brand-red group-hover:text-white",
+    icon: Leaf,
+    bgColor: "#FDF5EC",
+    iconColor: "#7A5235",
+    hoverBg: "#7A5235",
   },
   {
     key: "beauty",
     descKey: "beauty_desc",
-    icon: Sparkles,
-    color: "bg-pink-50 text-pink-600 group-hover:bg-pink-600 group-hover:text-white",
+    icon: Droplets,
+    bgColor: "#EAF4EA",
+    iconColor: "#2D5A27",
+    hoverBg: "#2D5A27",
   },
   {
     key: "supplements",
     descKey: "supplements_desc",
-    icon: Pill,
-    color: "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white",
+    icon: Flame,
+    bgColor: "#FDF0E8",
+    iconColor: "#B5402A",
+    hoverBg: "#B5402A",
   },
   {
     key: "wellness",
     descKey: "wellness_desc",
-    icon: Flower2,
-    color: "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white",
+    icon: Wind,
+    bgColor: "#F4F0E8",
+    iconColor: "#6B5238",
+    hoverBg: "#5C3D20",
   },
   {
     key: "lifestyle",
     descKey: "lifestyle_desc",
-    icon: Sun,
-    color: "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white",
+    icon: Coffee,
+    bgColor: "#F8F4EC",
+    iconColor: "#9B6B48",
+    hoverBg: "#7A5235",
   },
 ];
 
@@ -60,12 +70,24 @@ export function CategoryGrid() {
                 className="group flex flex-col items-center gap-3 rounded-2xl border border-brand-cream-dark bg-brand-cream p-5 text-center transition-all duration-200 hover:border-transparent hover:shadow-lg hover:-translate-y-1"
               >
                 <div
-                  className={`flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200 ${cat.color}`}
+                  className="flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200"
+                  style={{ background: cat.bgColor, color: cat.iconColor }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = cat.hoverBg;
+                    (e.currentTarget as HTMLElement).style.color = "#fff";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = cat.bgColor;
+                    (e.currentTarget as HTMLElement).style.color = cat.iconColor;
+                  }}
                 >
                   <Icon className="h-7 w-7" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="font-serif text-sm font-semibold text-foreground group-hover:text-brand-red transition-colors">
+                  <p
+                    className="font-serif text-sm font-semibold text-foreground transition-colors duration-200"
+                    style={{}}
+                  >
                     {t(cat.key)}
                   </p>
                   <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-snug">

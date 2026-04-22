@@ -4,42 +4,53 @@
 
 /* ─── Tailwind v4 Theme ─────────────────────────────────────────────────── */
 @theme {
-  /* Brand palette */
-  --color-brand-red:        #C0392B;
-  --color-brand-red-dark:   #A93226;
-  --color-brand-red-light:  #E74C3C;
-  --color-brand-cream:      #FAF7F2;
-  --color-brand-cream-dark: #EDE8DF;
-  --color-brand-stone:      #8B7355;
-  --color-brand-gold:       #C9A84C;
-  --color-brand-gold-light: #E8C76A;
+  /* Wood-grain brown — primary brand */
+  --color-brand-wood:        #7A5235;
+  --color-brand-wood-dark:   #5C3D20;
+  --color-brand-wood-light:  #9B6B48;
+
+  /* Brick red — accent */
+  --color-brand-red:         #B5402A;
+  --color-brand-red-dark:    #8F3020;
+  --color-brand-red-light:   #D4553C;
+
+  /* Deep green — accent */
+  --color-brand-green:       #2D5A27;
+  --color-brand-green-light: #4A7A44;
+
+  /* Warm cream */
+  --color-brand-cream:       #F6F0E8;
+  --color-brand-cream-dark:  #E8D8C4;
+  --color-brand-stone:       #6B5238;
+  --color-brand-gold:        #C9A84C;
+  --color-brand-gold-light:  #E8C76A;
 
   /* Semantic tokens */
-  --color-border:           #EDE8DF;
-  --color-input:            #EDE8DF;
-  --color-background:       #FAF7F2;
-  --color-foreground:       #2C2416;
-  --color-muted:            #F0EBE3;
-  --color-muted-foreground: #7A6A58;
-  --color-primary:          #C0392B;
+  --color-border:            #E8D8C4;
+  --color-input:             #E8D8C4;
+  --color-background:        #F6F0E8;
+  --color-foreground:        #231810;
+  --color-muted:             #EDE3D8;
+  --color-muted-foreground:  #7A6248;
+  --color-primary:           #7A5235;
   --color-primary-foreground: #FFFFFF;
-  --color-secondary:        #EDE8DF;
-  --color-secondary-foreground: #4A3D2E;
-  --color-accent:           #E2D9CE;
-  --color-accent-foreground: #2C2416;
-  --color-destructive:      #C0392B;
+  --color-secondary:         #E8D8C4;
+  --color-secondary-foreground: #4A3020;
+  --color-accent:            #DDD0C0;
+  --color-accent-foreground: #231810;
+  --color-destructive:       #B5402A;
   --color-destructive-foreground: #FFFFFF;
-  --color-card:             #FFFFFF;
-  --color-card-foreground:  #2C2416;
-  --color-popover:          #FFFFFF;
-  --color-popover-foreground: #2C2416;
-  --color-ring:             #C0392B;
+  --color-card:              #FFFDF9;
+  --color-card-foreground:   #231810;
+  --color-popover:           #FFFDF9;
+  --color-popover-foreground: #231810;
+  --color-ring:              #7A5235;
 
   /* Typography */
-  --font-sans:   "Noto Sans JP", sans-serif;
-  --font-serif:  "Noto Serif JP", serif;
+  --font-sans:    "Noto Sans JP", sans-serif;
+  --font-serif:   "Noto Serif JP", serif;
   --font-display: "Noto Serif JP", serif;
-  --font-mono:   "Courier New", monospace;
+  --font-mono:    "Courier New", monospace;
 
   /* Border radius */
   --radius:    0.75rem;
@@ -92,7 +103,7 @@
   }
 
   ::selection {
-    background-color: rgba(192, 57, 43, 0.18);
+    background-color: rgba(122, 82, 53, 0.18);
   }
 }
 
@@ -104,7 +115,7 @@
     justify-content: center;
     gap: 0.5rem;
     border-radius: var(--radius);
-    background-color: var(--color-brand-red);
+    background-color: var(--color-brand-wood);
     padding: 0.75rem 1.5rem;
     font-family: var(--font-sans);
     font-weight: 500;
@@ -114,11 +125,11 @@
     border: none;
     text-decoration: none;
   }
-  .btn-primary:hover  { background-color: var(--color-brand-red-dark); transform: scale(1.02); }
+  .btn-primary:hover  { background-color: var(--color-brand-wood-dark); transform: scale(1.02); }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .btn-primary:focus-visible {
-    outline: 2px solid var(--color-brand-red);
+    outline: 2px solid var(--color-brand-wood);
     outline-offset: 2px;
   }
 
@@ -128,17 +139,17 @@
     justify-content: center;
     gap: 0.5rem;
     border-radius: var(--radius);
-    border: 2px solid var(--color-brand-red);
+    border: 2px solid var(--color-brand-wood);
     padding: 0.75rem 1.5rem;
     font-family: var(--font-sans);
     font-weight: 500;
-    color: var(--color-brand-red);
+    color: var(--color-brand-wood);
     background: transparent;
     transition: all 0.2s;
     cursor: pointer;
     text-decoration: none;
   }
-  .btn-secondary:hover  { background-color: var(--color-brand-red); color: #fff; transform: scale(1.02); }
+  .btn-secondary:hover  { background-color: var(--color-brand-wood); color: #fff; transform: scale(1.02); }
   .btn-secondary:active { transform: scale(0.98); }
   .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -186,24 +197,24 @@
     align-items: center;
     gap: 0.25rem;
     border-radius: 9999px;
-    background-color: #eff6ff;
+    background-color: #fef9f0;
     padding: 0.125rem 0.5rem;
     font-size: 0.75rem;
     font-weight: 500;
-    color: #1d4ed8;
-    border: 1px solid #bfdbfe;
+    color: #7A5235;
+    border: 1px solid #e8d0a8;
   }
 
   .product-card {
-    background: #fff;
+    background: var(--color-card);
     border-radius: 0.75rem;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     border: 1px solid var(--color-brand-cream-dark);
     transition: box-shadow 0.3s, transform 0.3s;
   }
   .product-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 20px rgba(90, 60, 30, 0.14);
     transform: translateY(-4px);
   }
 

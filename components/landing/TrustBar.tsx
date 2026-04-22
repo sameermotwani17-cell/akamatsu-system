@@ -1,20 +1,46 @@
-import { ShieldCheck, Leaf, Wheat, Star, Store } from "lucide-react";
+import { History, MapPin, Leaf, Phone, Truck } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function TrustBar() {
   const t = useTranslations("trust");
 
   const TRUST_ITEMS = [
-    { icon: Store, text: t("free_pickup"), subtext: "Free Store Pickup", color: "text-brand-red" },
-    { icon: Leaf, text: t("organic_full"), subtext: "Certified Organic", color: "text-green-600" },
-    { icon: Wheat, text: t("gluten_free_full"), subtext: "Gluten-Free", color: "text-amber-600" },
-    { icon: ShieldCheck, text: t("secure_full"), subtext: "Secure Payment", color: "text-blue-600" },
-    { icon: Star, text: t("rating"), subtext: "1,200+ Reviews", color: "text-brand-gold" },
+    {
+      icon: History,
+      text: "創業85年",
+      subtext: "地域に根ざした信頼の老舗",
+      iconColor: "#7A5235",
+    },
+    {
+      icon: MapPin,
+      text: "地域密着",
+      subtext: "地元のお客様を第一に",
+      iconColor: "#2D5A27",
+    },
+    {
+      icon: Leaf,
+      text: t("organic_full"),
+      subtext: "無添加・自然食品",
+      iconColor: "#4A7A44",
+    },
+    {
+      icon: Phone,
+      text: "TEL・LINE受付",
+      subtext: "お気軽にお問い合わせを",
+      iconColor: "#B5402A",
+    },
+    {
+      icon: Truck,
+      text: t("free_pickup"),
+      subtext: "地域配達・全国ゆうパック",
+      iconColor: "#6B5238",
+    },
   ];
 
   return (
     <section
-      className="bg-brand-cream-dark border-y border-brand-cream-dark py-6"
+      className="border-y border-brand-cream-dark py-6"
+      style={{ background: "#EDE3D8" }}
       aria-label="Trust signals"
     >
       <div className="container-padded">
@@ -23,7 +49,7 @@ export function TrustBar() {
             const Icon = item.icon;
             return (
               <div key={item.text} className="flex items-center gap-3">
-                <div className={`shrink-0 ${item.color}`}>
+                <div className="shrink-0" style={{ color: item.iconColor }}>
                   <Icon className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div>

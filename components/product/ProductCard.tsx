@@ -50,7 +50,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           {/* Badges overlay */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.is_bestseller && (
-              <span className="rounded-md bg-brand-red px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide shadow-sm">
+              <span className="rounded-md px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide shadow-sm" style={{ background: "#7A5235" }}>
                 {t("product.bestseller")}
               </span>
             )}
@@ -60,7 +60,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               </span>
             )}
             {isOnSale && (
-              <span className="rounded-md bg-green-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide shadow-sm">
+              <span className="rounded-md px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide shadow-sm" style={{ background: "#2D5A27" }}>
                 {t("product.on_sale")}
               </span>
             )}
@@ -84,7 +84,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         )}
 
         <Link href={`/product/${product.id}`}>
-          <h3 className="font-serif text-sm font-medium text-foreground leading-snug line-clamp-2 hover:text-brand-red transition-colors">
+          <h3 className="font-serif text-sm font-medium text-foreground leading-snug line-clamp-2 transition-colors" onMouseEnter={(e) => (e.currentTarget.style.color = "#7A5235")} onMouseLeave={(e) => (e.currentTarget.style.color = "")}>
             {primaryName}
           </h3>
           <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-1">
@@ -118,7 +118,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {/* Price + CTA */}
         <div className="flex items-end justify-between mt-auto pt-1">
           <div>
-            <span className="font-serif text-base font-semibold text-brand-red">
+            <span className="font-serif text-base font-semibold" style={{ color: "#7A5235" }}>
               {formatPrice(displayPrice)}
             </span>
             {isOnSale && (
@@ -131,7 +131,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={stockStatus === "out_of_stock"}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-red text-white transition-all hover:bg-brand-red-dark hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-white transition-all hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "#7A5235" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#5C3D20")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#7A5235")}
             aria-label={`${t("product.add_to_cart")}: ${primaryName}`}
           >
             <ShoppingCart className="h-4 w-4" />
