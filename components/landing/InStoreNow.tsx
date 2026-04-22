@@ -33,9 +33,8 @@ export function InStoreNow() {
           </div>
           <Link
             href="/shop"
-            className="hidden sm:flex items-center gap-1.5 font-sans text-sm font-medium transition-colors group" style={{ color: "#7A5235" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#5C3D20")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "#7A5235")}
+            className="hidden sm:flex items-center gap-1.5 font-sans text-sm font-medium transition-colors group"
+            style={{ color: "#7A5235" }}
           >
             {t("landing.view_all")}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
