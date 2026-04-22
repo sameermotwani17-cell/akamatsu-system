@@ -9,7 +9,6 @@ import { createClient } from "@/lib/supabase/client";
 export default function AdminLoginPage() {
   const t = useTranslations("admin");
   const router = useRouter();
-  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +17,7 @@ export default function AdminLoginPage() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await createClient().auth.getSession();
       if (active && data.session) {
         router.replace("/owner/orders");
       }
@@ -26,14 +25,14 @@ export default function AdminLoginPage() {
     return () => {
       active = false;
     };
-  }, [router, supabase]);
+  }, [router]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error: signInError } = await createClient().auth.signInWithPassword({
       email,
       password,
     });
