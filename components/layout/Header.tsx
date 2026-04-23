@@ -68,8 +68,7 @@ export function Header() {
                 <Link
                   key={cat.key}
                   href={cat.href}
-                  className="font-sans text-sm text-foreground/70 transition-colors hover:text-brand-wood"
-                  style={{ ["--tw-hover-text-opacity" as string]: "1" }}
+                  className="font-sans text-sm text-foreground/70 transition-colors"
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#7A5235")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "")}
                 >
@@ -144,7 +143,6 @@ export function Header() {
                   placeholder={t("nav.search_placeholder")}
                   autoFocus
                   className="w-full rounded-lg border border-brand-cream-dark bg-brand-cream px-4 py-2.5 text-sm font-sans outline-none transition-shadow"
-                  style={{ ["--tw-ring-color" as string]: "#7A5235" }}
                   onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 2px #7A5235")}
                   onBlur={(e) => (e.currentTarget.style.boxShadow = "")}
                   aria-label={t("nav.search_products")}
