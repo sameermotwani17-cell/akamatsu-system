@@ -15,10 +15,14 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   const verifyOwnerAccess = useCallback(async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
     const response = await fetch("/api/auth/owner-access", {
       method: "GET",
       cache: "no-store",
-    });
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
       throw new Error(t("checkAccessFailed"));
@@ -61,37 +65,36 @@ export default function AdminLoginPage() {
     return () => {
       active = false;
     };
-  }, [router, t]);
+  }, [router, verifyOwnerAccess, t]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error: signInError } = await createClient().auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      setError(signInError.message);
-      setLoading(false);
-      return;
-    }
-
     try {
+      const { error: signInError } = await createClient().auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+        return;
+      }
+
       const access = await verifyOwnerAccess();
 
       if (!access.owner) {
         await createClient().auth.signOut();
         setError(t("notAuthorized"));
-        setLoading(false);
         return;
       }
 
       router.replace("/owner/orders");
     } catch {
       setError(t("checkAccessFailed"));
+    } finally {
       setLoading(false);
     }
   };
