@@ -253,7 +253,9 @@
     "password": "Password",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
-    "backToStorefront": "Back to storefront"
+    "backToStorefront": "Back to storefront",
+    "notAuthorized": "This account does not have owner access.",
+    "checkAccessFailed": "Could not verify owner access. Please try again."
   },
   "owner": {
     "ordersTitle": "Owner Orders",

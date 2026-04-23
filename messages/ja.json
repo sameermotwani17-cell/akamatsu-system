@@ -253,7 +253,9 @@
     "password": "パスワード",
     "signIn": "サインイン",
     "signingIn": "サインイン中...",
-    "backToStorefront": "ストアへ戻る"
+    "backToStorefront": "ストアへ戻る",
+    "notAuthorized": "このアカウントにはオーナー権限がありません。",
+    "checkAccessFailed": "オーナー権限を確認できませんでした。時間をおいて再度お試しください。"
   },
   "owner": {
     "ordersTitle": "オーナー注文管理",

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -14,18 +14,54 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const verifyOwnerAccess = useCallback(async () => {
+    const response = await fetch("/api/auth/owner-access", {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(t("checkAccessFailed"));
+    }
+
+    const data = (await response.json()) as {
+      authenticated: boolean;
+      owner: boolean;
+    };
+
+    return data;
+  }, [t]);
+
   useEffect(() => {
     let active = true;
     (async () => {
       const { data } = await createClient().auth.getSession();
-      if (active && data.session) {
-        router.replace("/owner/orders");
+      if (!active || !data.session) {
+        return;
+      }
+
+      try {
+        const access = await verifyOwnerAccess();
+        if (!active) {
+          return;
+        }
+
+        if (access.owner) {
+          router.replace("/owner/orders");
+          return;
+        }
+
+        setError(t("notAuthorized"));
+      } catch {
+        if (active) {
+          setError(t("checkAccessFailed"));
+        }
       }
     })();
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [router, t]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -43,7 +79,21 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.replace("/owner/orders");
+    try {
+      const access = await verifyOwnerAccess();
+
+      if (!access.owner) {
+        await createClient().auth.signOut();
+        setError(t("notAuthorized"));
+        setLoading(false);
+        return;
+      }
+
+      router.replace("/owner/orders");
+    } catch {
+      setError(t("checkAccessFailed"));
+      setLoading(false);
+    }
   };
 
   return (

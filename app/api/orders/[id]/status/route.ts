@@ -23,7 +23,7 @@ export async function PATCH(req: Request, { params }: Params) {
     paymentStatus?: "pending" | "paid" | "failed" | "refunded";
     archiveAction?: "archive" | "reopen";
     pickedUp?: boolean;
-  };
+  }; 
 
   if (!payload.orderStatus && !payload.paymentStatus && !payload.archiveAction && typeof payload.pickedUp !== "boolean") {
     return NextResponse.json({ error: "No update fields provided" }, { status: 400 });
@@ -31,6 +31,8 @@ export async function PATCH(req: Request, { params }: Params) {
 
   const updateData: Record<string, string | null> = {};
   const nowIso = new Date().toISOString();
+  // TODO: Replace with strict table typings after regenerating `types/database.ts`.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient() as any;
 
   if (payload.orderStatus) updateData.order_status = payload.orderStatus;
